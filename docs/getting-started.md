@@ -54,6 +54,12 @@ OPENAI_API_KEY=sk-xxx       # pra embeddings (recomendado)
 ANTHROPIC_API_KEY=sk-ant-xxx # pra LLM (opcional no MVP — só botão Testar)
 ```
 
+> **Próximo passo (Next.js precisa ver o env):** symlink o `.env.local` da raiz pro `apps/web/`:
+> ```bash
+> ln -sf ../../.env.local apps/web/.env.local
+> ```
+> Sem isso, o Next.js dev server não enxerga `DATABASE_URL` e endpoints retornam 500.
+
 ### 5. Rodar migrations
 
 ```bash
