@@ -18,6 +18,7 @@ export default function HelpPage() {
       <Compile />
       <Versions />
       <Plug />
+      <Prompts />
       <Cheatsheet />
       <Footer />
     </div>
@@ -54,6 +55,7 @@ function Hero() {
         <TocChip href="#compile" label="Compilar" />
         <TocChip href="#versions" label="Versões" />
         <TocChip href="#plug" label="Plugar Claude Desktop" />
+        <TocChip href="#prompts" label="Prompts prontos" />
       </div>
     </section>
   )
@@ -706,13 +708,302 @@ function Plug() {
 }
 
 // ============================================================
+// PROMPTS PRONTOS
+// ============================================================
+
+function Prompts() {
+  return (
+    <section id="prompts" className="scroll-mt-8">
+      <SectionLabel
+        num="11"
+        title="Prompts prontos · cola na sua IA favorita"
+      />
+      <p className="text-sm text-zinc-600 mb-4 max-w-2xl">
+        Copy-paste pra <strong>Claude Code</strong>, <strong>Codex</strong>,{' '}
+        <strong>Cursor</strong>, <strong>Claude Desktop</strong>, ou qualquer IA com tool use.
+        Substitui <code className="mono text-[11px]">&lt;WORKSPACE_ID&gt;</code>,{' '}
+        <code className="mono text-[11px]">&lt;BRAIN_ID&gt;</code> e{' '}
+        <code className="mono text-[11px]">&lt;API_KEY&gt;</code> pelos seus valores reais (pega em{' '}
+        <Link href="/dashboard" className="underline decoration-zinc-400">
+          Acesso ao cérebro
+        </Link>
+        ).
+      </p>
+
+      <div className="space-y-3">
+        <PromptCard
+          n="01"
+          tool="Claude Code / Codex / qualquer IA com filesystem"
+          objective="Configurar o MCP do ContextOS no Claude Desktop"
+          when="Você quer plugar o cérebro no Claude Desktop sem editar JSON manualmente."
+          prompt={`Quero plugar o ContextOS (servidor de contexto operacional) no Claude Desktop via MCP.
+
+Faz isso pra mim:
+
+1. Detecta meu OS e abre o arquivo de config do Claude Desktop:
+   - macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
+   - Windows: %APPDATA%\\Claude\\claude_desktop_config.json
+   - Linux: ~/.config/Claude/claude_desktop_config.json
+
+2. Se o arquivo não existir, cria com objeto vazio { "mcpServers": {} }.
+
+3. Adiciona (ou substitui se já existir) a entrada "contextos":
+
+{
+  "mcpServers": {
+    "contextos": {
+      "transport": {
+        "type": "streamable-http",
+        "url": "http://localhost:3000/mcp",
+        "headers": {
+          "Authorization": "Bearer <API_KEY>"
+        }
+      }
+    }
+  }
+}
+
+4. Preserva qualquer outro MCP server já configurado.
+
+5. Confirma o conteúdo final do arquivo.
+
+Depois me lembra de reiniciar o Claude Desktop (Cmd+Q + abrir de novo).`}
+        />
+
+        <PromptCard
+          n="02"
+          tool="Claude Code / Codex / Cursor agent"
+          objective="Configurar o MCP do ContextOS no Cursor"
+          when="Quer usar Composer/Agent do Cursor com seu cérebro."
+          prompt={`Quero plugar o ContextOS no Cursor via MCP.
+
+Edita ou cria o arquivo ~/.cursor/mcp.json adicionando o servidor "contextos":
+
+{
+  "mcpServers": {
+    "contextos": {
+      "url": "http://localhost:3000/mcp",
+      "headers": {
+        "Authorization": "Bearer <API_KEY>"
+      }
+    }
+  }
+}
+
+Preserva qualquer outro servidor MCP existente. Depois me orienta a:
+- Abrir Settings → MCP no Cursor
+- Confirmar que "contextos" aparece como "Connected"
+- Testar no Composer/Agent: "liste os cérebros do meu workspace"`}
+        />
+
+        <PromptCard
+          n="03"
+          tool="Claude Code / Codex (com shell)"
+          objective="Bootstrapar workspace + projeto + cérebro + API key via REST"
+          when="Setup zero — quer tudo criado por shell antes de ir pra UI."
+          prompt={`Cria a estrutura inicial do meu ContextOS via REST. Servidor roda em http://localhost:3000.
+
+Já tenho user logado com cookie de sessão (ou me ajuda a fazer signup via POST /api/auth/signup com email/senha que vou te dar).
+
+Sequência:
+
+1. POST /api/workspaces { "name": "<NOME_WORKSPACE>", "slug": "<slug>" } → guarda workspace_id
+2. POST /api/workspaces/{workspace_id}/projects { "name": "<NOME_PROJETO>" } → guarda project_id
+3. POST /api/projects/{project_id}/brains { "name": "<NOME_CEREBRO>", "description": "..." } → guarda brain_id
+4. POST /api/workspaces/{workspace_id}/api-keys { "name": "agent-key", "scopes": ["*"] } → exibe o secret completo (só aparece 1x)
+
+Usa curl com cookie jar (/tmp/contextos-cookies.txt). No final me mostra:
+- workspace_id
+- project_id
+- brain_id
+- API key secret completa
+
+Esses 4 valores eu vou colar nos próximos prompts.`}
+        />
+
+        <PromptCard
+          n="04"
+          tool="Claude Desktop / Cursor / qualquer IA com MCP do ContextOS plugado"
+          objective="Popular o cérebro vazio com persona + regras + memórias"
+          when="Cérebro recém-criado, quer enchê-lo via conversa em vez de canvas."
+          prompt={`Você tem acesso ao MCP do ContextOS. Quero que você popule o cérebro <BRAIN_ID> no workspace <WORKSPACE_ID> com a configuração abaixo.
+
+Use a tool save_memory pra cada item, com scope_type="workspace" e scope_id=<WORKSPACE_ID>.
+
+Persona (1 item, single, prioridade alta):
+- title: "Persona"
+- content: "Você é um SDR B2B sênior, tom direto e técnico, sem fluff comercial. Prova social via cases concretos."
+- tags: ["voice", "public"]
+
+Regras (3 itens, multi, prioridade alta):
+- "Nunca dar desconto antes de qualificar BANT completo."
+- "Resposta inicial sempre em até 2 parágrafos."
+- "Cite sempre o nome do produto sem encurtar."
+(tags: ["rules", "commercial"])
+
+Memórias (3 itens, multi, prioridade média):
+- "ICP é dev solo IA-pesado que usa Claude Code + Cursor + n8n."
+- "Cases fortes: Funil365, IDEVA-AI, MoneyBrand."
+- "Faixa de ticket: R$ 5k–50k mensais."
+(tags: ["context", "commercial"])
+
+Depois lista de volta o que criou (memory ids + títulos) pra eu confirmar.`}
+        />
+
+        <PromptCard
+          n="05"
+          tool="Claude Desktop / Cursor / qualquer IA com MCP plugado"
+          objective="Smoke test completo do MCP"
+          when="Acabou de configurar o MCP, quer validar que tudo funciona end-to-end."
+          prompt={`Você tem o MCP do ContextOS plugado. Roda esse smoke test e me reporta cada passo:
+
+1. Chama list_brains. Mostra os cérebros disponíveis com id + nome + project_name.
+
+2. Pega o primeiro cérebro retornado (ou usa <BRAIN_ID> se eu te passei). Chama retrieve_context com query="teste de integração" e limit=5. Mostra quantos blocos voltaram, types e prioridades.
+
+3. Chama compile_context com:
+   - brain_id: o mesmo do passo 2
+   - query: "responder lead pedindo proposta comercial"
+   - format: "markdown"
+   - budget_tokens: 2000
+
+   Mostra o markdown compilado + stats (tokens_estimated, blocks_included).
+
+4. Chama save_memory com:
+   - workspace_id: <WORKSPACE_ID>
+   - scope_type: "workspace"
+   - scope_id: <WORKSPACE_ID>
+   - title: "Smoke test"
+   - content: "MCP funcionando em <data atual>"
+   - tags: ["smoke", "public"]
+
+   Mostra o memory_id retornado.
+
+5. Chama search_memory com query="smoke" + workspace_id. Confirma que a memória recém-criada aparece nos resultados.
+
+No final, dá um resumo: ✓ ou ✗ pra cada um dos 5 passos.`}
+        />
+
+        <PromptCard
+          n="06"
+          tool="Claude Desktop / Cursor / qualquer IA com MCP plugado"
+          objective="Importar um system prompt longo (ChatGPT/Claude) pra blocos do ContextOS"
+          when="Você tem um system prompt enorme num custom GPT/Claude project e quer migrar pro cérebro."
+          prompt={`Vou colar abaixo um system prompt longo. Quero que você o decomponha em blocos do ContextOS e os salve no cérebro <BRAIN_ID> do workspace <WORKSPACE_ID>.
+
+Regras de decomposição:
+- Tom de voz / persona → 1 memória com title="Persona", tags=["voice"], prioridade implícita alta
+- Regras de comportamento ("você nunca", "sempre faça") → 1 memória por regra, tags=["rules"]
+- Fatos do produto/empresa (nomes, preços, processos) → 1 memória por fato, tags=["facts"]
+- Exemplos de input/output → 1 memória por exemplo, tags=["examples"]
+- Instruções de formato (markdown, JSON) → 1 memória, title="Output format", tags=["output"]
+
+Pra cada bloco extraído chame save_memory com scope_type="workspace" e scope_id=<WORKSPACE_ID>.
+
+No final me liste o que criou (id + title + tags + content resumido em 1 linha) numa tabela markdown.
+
+=== SYSTEM PROMPT ORIGINAL ===
+<cola aqui o system prompt completo>
+=== FIM ===`}
+        />
+
+        <PromptCard
+          n="07"
+          tool="Claude Code / Codex (com shell)"
+          objective="Debugar MCP que não conecta ou retorna erro"
+          when="Plugou no Claude Desktop/Cursor mas tools não aparecem ou dão erro."
+          prompt={`O MCP do ContextOS não está funcionando no meu cliente (Claude Desktop ou Cursor). Diagnostica:
+
+1. curl http://localhost:3000/health → deve retornar status:"ok" com db.ok + redis.ok=true. Se não, infra não está de pé.
+
+2. curl -X POST http://localhost:3000/mcp \\
+     -H "Authorization: Bearer <API_KEY>" \\
+     -H "Content-Type: application/json" \\
+     -H "Accept: application/json, text/event-stream" \\
+     -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"debug","version":"0"}}}'
+
+   - Espera-se 200 com serverInfo.name="contextos" + protocolVersion + capabilities.
+   - 401 = chave inválida ou revogada.
+   - 403 com "mcp_requires_api_key_scoped_to_workspace" = chave OK mas precisa estar scoped a workspace específico.
+
+3. curl -X POST http://localhost:3000/mcp \\
+     -H "Authorization: Bearer <API_KEY>" \\
+     -H "Content-Type: application/json" \\
+     -H "Accept: application/json, text/event-stream" \\
+     -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+
+   - Deve retornar 5 tools: list_brains, retrieve_context, compile_context, search_memory, save_memory.
+
+4. Verifica que o arquivo de config do cliente MCP tem a entrada correta (path varia por OS — pergunta antes se não souber).
+
+5. Se o cliente foi reiniciado depois de editar a config.
+
+Reporta o resultado de cada passo + a hipótese provável da falha.`}
+        />
+      </div>
+
+      <div className="floating-panel p-4 mt-4 bg-brand-50/30 border-brand-200">
+        <div className="mono text-[10px] uppercase tracking-wider text-zinc-500 mb-1">
+          Dica
+        </div>
+        <p className="text-xs text-zinc-700 leading-relaxed">
+          Salva esses prompts num arquivo <code>contextos-prompts.md</code> no seu cofre (Obsidian,
+          Notion, ou um <em>memory</em> do próprio ContextOS!) pra reutilizar. Cada prompt é
+          auto-contido — não depende dos outros.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+function PromptCard({
+  n,
+  tool,
+  objective,
+  when,
+  prompt
+}: {
+  n: string
+  tool: string
+  objective: string
+  when: string
+  prompt: string
+}) {
+  return (
+    <div className="floating-panel p-4">
+      <div className="flex items-start gap-3 mb-3">
+        <span
+          className="w-6 h-6 rounded-full flex items-center justify-center mono text-[10px] flex-shrink-0 mt-0.5"
+          style={{ background: '#C5F432', color: '#0a0a0a' }}
+        >
+          {n}
+        </span>
+        <div className="flex-1 min-w-0">
+          <div className="font-medium text-sm">{objective}</div>
+          <div className="mono text-[10px] uppercase tracking-wider text-zinc-400 mt-1">
+            {tool}
+          </div>
+        </div>
+      </div>
+      <p className="text-[11px] text-zinc-600 mb-2 ml-9">
+        <span className="mono text-zinc-400">quando: </span>
+        {when}
+      </p>
+      <div className="ml-9">
+        <CodeSnippet>{prompt}</CodeSnippet>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================
 // CHEATSHEET
 // ============================================================
 
 function Cheatsheet() {
   return (
     <section className="scroll-mt-8">
-      <SectionLabel num="11" title="Cheatsheet · comandos úteis" />
+      <SectionLabel num="12" title="Cheatsheet · comandos úteis" />
 
       <div className="grid md:grid-cols-2 gap-3">
         <div className="floating-panel p-4">
