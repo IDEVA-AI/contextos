@@ -306,11 +306,13 @@ function filterByRbac(
   candidates: Candidate[],
   apiKeyScopes: string[] | undefined
 ): Candidate[] {
-  if (!apiKeyScopes || apiKeyScopes.length === 0) {
-    // Sem scopes da API key → assume acesso completo (session user dono)
+  if (apiKeyScopes === undefined) {
+    // Session-based call (owner do workspace) — sem RBAC, acesso completo
     return candidates
   }
-  // Implementação Sprint 6: bloco entra se todas suas tags estão em scopes (com wildcard)
+  // Bearer (API key) — aplica tag-based RBAC default-deny
+  // Bloco entra se TODAS suas tags estão em scopes da key
+  // Bloco sem tags = só acessível com scope 'public'
   return candidates.filter((c) => {
     if (c.tags.length === 0) return apiKeyScopes.includes('public')
     return c.tags.every((tag) =>
@@ -321,6 +323,7 @@ function filterByRbac(
 
 function tagMatchesScope(tag: string, scope: string): boolean {
   if (tag === scope) return true
+  if (scope === '*') return true
   if (scope.endsWith(':*')) {
     return tag.startsWith(scope.slice(0, -1))
   }

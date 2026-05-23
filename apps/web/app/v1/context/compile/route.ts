@@ -8,8 +8,8 @@ import {
   setCachedPackage
 } from '@/lib/compile-cache'
 import { buildPackage } from '@/lib/package-builder'
-import { getCurrentSession } from '@/lib/session'
 import { persistTrace } from '@/lib/trace'
+import { authenticateV1Request } from '@/lib/v1-auth'
 import { getWorkspaceByIdForUser } from '@/lib/workspace'
 
 const CompileSchema = z.object({
@@ -26,8 +26,8 @@ const CompileSchema = z.object({
 })
 
 export async function POST(req: Request) {
-  const session = await getCurrentSession()
-  if (!session) {
+  const auth = await authenticateV1Request(req)
+  if (!auth) {
     return NextResponse.json({ error: 'unauthenticated' }, { status: 401 })
   }
 
@@ -40,7 +40,12 @@ export async function POST(req: Request) {
     )
   }
 
-  const ws = await getWorkspaceByIdForUser(parsed.data.workspace_id, session.userId)
+  // API keys são scoped a 1 workspace específico — não podem cruzar
+  if (auth.source === 'api_key' && auth.workspaceId !== parsed.data.workspace_id) {
+    return NextResponse.json({ error: 'workspace_mismatch' }, { status: 403 })
+  }
+
+  const ws = await getWorkspaceByIdForUser(parsed.data.workspace_id, auth.userId)
   if (!ws) {
     return NextResponse.json({ error: 'workspace_not_found' }, { status: 404 })
   }
@@ -54,8 +59,9 @@ export async function POST(req: Request) {
     query: parsed.data.query,
     format: parsed.data.format,
     budgetTokens: parsed.data.budget_tokens,
-    consumer: parsed.data.consumer ?? session.email,
-    includeExamples: parsed.data.include_examples
+    consumer: parsed.data.consumer,
+    includeExamples: parsed.data.include_examples,
+    apiKeyScopes: auth.source === 'api_key' ? auth.scopes : undefined
   }
 
   const cacheKey = makeCacheKey(input)
@@ -73,6 +79,7 @@ export async function POST(req: Request) {
       workspaceId: ws.id,
       brainId: input.brainId,
       brainVersionId: result.contextVersionId,
+      apiKeyId: auth.apiKeyId,
       endpoint: '/v1/context/compile',
       requestPayload: body,
       stats: result.stats,

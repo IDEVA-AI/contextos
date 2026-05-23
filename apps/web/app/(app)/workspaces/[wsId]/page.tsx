@@ -36,13 +36,20 @@ export default async function WorkspaceDetailPage({
         <p className="text-sm text-zinc-600 mt-2">
           Projetos agrupam cérebros relacionados. Cada cérebro vira um canvas executável.
         </p>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap gap-2">
           <Link
             href={`/workspaces/${workspace.id}/memories`}
             className="floating-panel inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium hover:bg-zinc-50 transition-colors"
           >
             <span className="mono text-[10px] text-zinc-400">m</span>
-            Memórias do workspace
+            Memórias
+          </Link>
+          <Link
+            href={`/workspaces/${workspace.id}/access`}
+            className="floating-panel inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium hover:bg-zinc-50 transition-colors"
+          >
+            <span className="mono text-[10px] text-zinc-400">a</span>
+            Acesso ao cérebro
           </Link>
         </div>
       </div>
