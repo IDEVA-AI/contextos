@@ -12,6 +12,8 @@
   "dependencies": {
     "@contextos/db": "workspace:*",
     "drizzle-orm": "^0.45.2",
+    "openai": "^6.39.0",
+    "unpdf": "^1.6.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {

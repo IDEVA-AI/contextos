@@ -19,6 +19,7 @@ import '@xyflow/react/dist/style.css'
 import { type DragEvent, useCallback, useMemo, useRef, useState } from 'react'
 
 import { ContextNode } from './context-node'
+import { DocumentsPanel } from './documents-panel'
 import { NodePalette, type PaletteDragPayload } from './node-palette'
 import { PropertiesPanel } from './properties-panel'
 import { SaveIndicator } from './save-indicator'
@@ -142,6 +143,7 @@ function CanvasInner({ brainId, initialNodes, initialEdges }: Props) {
       <NodePalette />
       <SaveIndicator status={status} lastSavedAt={lastSavedAt} />
       <VersionsPanel brainId={brainId} />
+      <DocumentsPanel brainId={brainId} />
       <PropertiesPanel
         node={selectedNode}
         onChange={updateNodeData}
