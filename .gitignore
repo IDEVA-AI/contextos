@@ -1,0 +1,51 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+.next
+.turbo
+dist
+build
+out
+
+# Env files
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+*.log
+logs
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/*
+!.vscode/settings.json
+.idea
+*.swp
+*.swo
+
+# Drizzle migration journal noise
+**/drizzle/meta/_journal.json
+
+# Local data and storage
+data/
+storage/
+*.sqlite
+*.db
+
+# Coverage
+coverage/
+.nyc_output
+
+# Misc
+.cache
+.eslintcache
+
+# Pendente classificar (perguntar dono antes de commitar)
+stylespec.html

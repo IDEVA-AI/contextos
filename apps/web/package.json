@@ -1,0 +1,43 @@
+{
+  "name": "@contextos/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.98.0",
+    "@contextos/core": "workspace:*",
+    "@contextos/db": "workspace:*",
+    "@contextos/mcp": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@tanstack/react-query": "^5.100.13",
+    "@xyflow/react": "^12.10.2",
+    "ai": "^6.0.191",
+    "bcrypt": "^5.1.1",
+    "jose": "^5.9.6",
+    "next": "16.2.6",
+    "pino": "^9.5.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "unpdf": "^0.12.1",
+    "zod": "^3.23.8",
+    "zustand": "^5.0.13"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

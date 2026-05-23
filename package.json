@@ -1,0 +1,39 @@
+{
+  "name": "contextos",
+  "private": true,
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "type-check": "turbo run type-check",
+    "db:generate": "pnpm --filter @contextos/db generate",
+    "db:migrate": "pnpm --filter @contextos/db migrate",
+    "db:push": "pnpm --filter @contextos/db push",
+    "db:studio": "pnpm --filter @contextos/db studio",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "infra:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "bcrypt",
+      "esbuild",
+      "msgpackr-extract",
+      "sharp",
+      "unrs-resolver"
+    ]
+  }
+}
