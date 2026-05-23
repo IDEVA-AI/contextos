@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { BrainCreateForm } from '@/components/brain-create-form'
 import { BrainDeleteForm } from '@/components/brain-delete-form'
+import { BrainFromTemplateForm } from '@/components/brain-from-template-form'
 import { ProjectCreateForm } from '@/components/project-create-form'
 import { ProjectDeleteForm } from '@/components/project-delete-form'
 import { listBrainsForProject } from '@/lib/brain'
@@ -118,6 +119,7 @@ export default async function WorkspaceDetailPage({
                     </ul>
                   )}
                   <BrainCreateForm projectId={proj.id} />
+                  <BrainFromTemplateForm projectId={proj.id} />
                 </div>
               </div>
             ))}

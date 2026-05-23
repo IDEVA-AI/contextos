@@ -23,6 +23,18 @@ type CompileResponse = {
   [k: string]: unknown
 }
 
+type TestResponse = {
+  provider: string
+  model: string
+  trace_id: string
+  response: string
+  package_stats?: {
+    tokensEstimated: number
+    blocksIncluded: number
+    blocksConsidered: number
+  }
+}
+
 export function CompilePanel({
   workspaceId,
   brainId
@@ -36,12 +48,15 @@ export function CompilePanel({
   const [budget, setBudget] = useState(4000)
   const [format, setFormat] = useState<Format>('markdown')
   const [loading, setLoading] = useState(false)
+  const [testing, setTesting] = useState(false)
   const [result, setResult] = useState<CompileResponse | null>(null)
+  const [testResult, setTestResult] = useState<TestResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   async function handleCompile() {
     setError(null)
     setResult(null)
+    setTestResult(null)
     setLoading(true)
     try {
       const res = await fetch('/v1/context/compile', {
@@ -64,6 +79,31 @@ export function CompilePanel({
       setResult(data)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleTest() {
+    setError(null)
+    setTestResult(null)
+    setTesting(true)
+    try {
+      const res = await fetch(`/api/brains/${brainId}/test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query,
+          task: task || undefined,
+          budget_tokens: budget
+        })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.message ?? data.error ?? 'Erro ao testar')
+        return
+      }
+      setTestResult(data)
+    } finally {
+      setTesting(false)
     }
   }
 
@@ -157,16 +197,27 @@ export function CompilePanel({
               />
             </div>
 
-            <Button
-              type="button"
-              variant="brand"
-              size="sm"
-              disabled={loading || !query.trim()}
-              onClick={handleCompile}
-              className="w-full"
-            >
-              {loading ? 'Compilando...' : 'Compilar'}
-            </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="brand"
+                size="sm"
+                disabled={loading || testing || !query.trim()}
+                onClick={handleCompile}
+              >
+                {loading ? 'Compilando...' : 'Compilar'}
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                disabled={loading || testing || !query.trim()}
+                onClick={handleTest}
+                title="Compila e roda contra LLM real (Anthropic/OpenAI)"
+              >
+                {testing ? 'Testando...' : '⚡ Testar com IA'}
+              </Button>
+            </div>
 
             {error && (
               <div className="text-[10px] text-red-600 bg-red-50 border border-red-100 rounded px-2 py-1">
@@ -176,11 +227,30 @@ export function CompilePanel({
           </div>
 
           <div className="overflow-y-auto p-3 space-y-3">
-            {!result && !loading && (
+            {!result && !testResult && !loading && !testing && (
               <p className="text-[11px] text-zinc-500">
-                Compila pra ver o pacote que vai pra IA.
+                Compila pra ver o pacote, ou testa direto com IA.
               </p>
             )}
+
+            {testResult && (
+              <div className="space-y-2">
+                <div className="mono text-[10px] uppercase tracking-wider text-zinc-400">
+                  Resposta · {testResult.provider} · {testResult.model}
+                </div>
+                {testResult.package_stats && (
+                  <div className="mono text-[10px] text-zinc-500">
+                    Contexto: {testResult.package_stats.blocksIncluded}/
+                    {testResult.package_stats.blocksConsidered} blocos ·{' '}
+                    {testResult.package_stats.tokensEstimated} tokens
+                  </div>
+                )}
+                <div className="floating-panel bg-brand-50/40 border-brand-200 p-3 text-xs leading-relaxed whitespace-pre-wrap">
+                  {testResult.response}
+                </div>
+              </div>
+            )}
+
             {result?.stats && (
               <div className="grid grid-cols-2 gap-2 text-[10px]">
                 <Stat

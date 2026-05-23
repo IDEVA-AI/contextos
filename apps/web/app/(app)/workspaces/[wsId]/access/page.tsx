@@ -19,17 +19,53 @@ function fmtAgo(date: Date | null): string {
   return `há ${d}d`
 }
 
+const ENDPOINT_OPTIONS = [
+  { value: '', label: 'todos' },
+  { value: '/v1/context/compile', label: '/v1/context/compile' },
+  { value: '/v1/context/retrieve', label: '/v1/context/retrieve' },
+  { value: '/mcp/compile_context', label: '/mcp/compile_context' }
+]
+
+const STATUS_OPTIONS = [
+  { value: '', label: 'todos' },
+  { value: 'success', label: 'sucesso (<400)' },
+  { value: 'error', label: 'erro (>=400)' }
+]
+
 export default async function AccessPage({
-  params
+  params,
+  searchParams
 }: {
   params: Promise<{ wsId: string }>
+  searchParams: Promise<{
+    endpoint?: string
+    apiKeyId?: string
+    status?: string
+    hours?: string
+  }>
 }) {
   const { wsId } = await params
+  const filters = await searchParams
   const { workspace } = await requireWorkspace(wsId)
-  const [keys, logs, hdrs] = await Promise.all([
+  const hours = Number.parseInt(filters.hours ?? '24', 10)
+  const statusFilter =
+    filters.status === 'success'
+      ? { statusLt: 400 }
+      : filters.status === 'error'
+        ? { statusGte: 400 }
+        : {}
+
+  const hdrs = await headers()
+  const [keys, logs] = await Promise.all([
     listApiKeysForWorkspace(workspace.id),
-    listAccessLogsForWorkspace({ workspaceId: workspace.id, hours: 24, limit: 50 }),
-    headers()
+    listAccessLogsForWorkspace({
+      workspaceId: workspace.id,
+      hours,
+      limit: 100,
+      endpoint: filters.endpoint || undefined,
+      apiKeyId: filters.apiKeyId || undefined,
+      ...statusFilter
+    })
   ])
 
   const proto = hdrs.get('x-forwarded-proto') ?? 'http'
@@ -38,9 +74,15 @@ export default async function AccessPage({
 
   const endpoints = [
     { label: 'REST API', url: `${base}/v1`, hint: '/context/compile, /memory/search...' },
-    { label: 'MCP Server', url: `${base}/mcp`, hint: 'Sprint 7 — coming soon' },
+    { label: 'MCP Server', url: `${base}/mcp`, hint: 'Claude Desktop, Cursor, Cline' },
     { label: 'OpenAPI', url: `${base}/openapi.json`, hint: 'Sprint 9' }
   ]
+
+  const csvParams = new URLSearchParams()
+  csvParams.set('hours', String(hours))
+  if (filters.endpoint) csvParams.set('endpoint', filters.endpoint)
+  if (filters.apiKeyId) csvParams.set('apiKeyId', filters.apiKeyId)
+  const csvHref = `/api/workspaces/${workspace.id}/traces/export?${csvParams.toString()}`
 
   return (
     <div className="space-y-8">
@@ -168,12 +210,124 @@ export default async function AccessPage({
       </section>
 
       <section>
-        <div className="mono text-[10px] uppercase tracking-wider text-zinc-400 mb-3">
-          Logs · últimas 24h · {logs.length} consultas
+        <div className="flex items-center justify-between mb-3">
+          <div className="mono text-[10px] uppercase tracking-wider text-zinc-400">
+            Logs · últimas {hours}h · {logs.length} consultas
+          </div>
+          <a
+            href={csvHref}
+            className="floating-panel inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-medium hover:bg-zinc-50"
+            download
+          >
+            ↓ Exportar CSV
+          </a>
         </div>
+
+        <form
+          method="get"
+          className="floating-panel p-3 mb-3 flex flex-wrap items-end gap-3"
+        >
+          <div className="space-y-1">
+            <label
+              htmlFor="filter-endpoint"
+              className="mono text-[10px] uppercase tracking-wider text-zinc-400"
+            >
+              Endpoint
+            </label>
+            <select
+              id="filter-endpoint"
+              name="endpoint"
+              defaultValue={filters.endpoint ?? ''}
+              className="h-8 rounded-md border border-zinc-200 bg-white px-2 text-xs"
+            >
+              {ENDPOINT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label
+              htmlFor="filter-key"
+              className="mono text-[10px] uppercase tracking-wider text-zinc-400"
+            >
+              API Key
+            </label>
+            <select
+              id="filter-key"
+              name="apiKeyId"
+              defaultValue={filters.apiKeyId ?? ''}
+              className="h-8 rounded-md border border-zinc-200 bg-white px-2 text-xs"
+            >
+              <option value="">todas</option>
+              {keys.map((k) => (
+                <option key={k.id} value={k.id}>
+                  {k.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label
+              htmlFor="filter-status"
+              className="mono text-[10px] uppercase tracking-wider text-zinc-400"
+            >
+              Status
+            </label>
+            <select
+              id="filter-status"
+              name="status"
+              defaultValue={filters.status ?? ''}
+              className="h-8 rounded-md border border-zinc-200 bg-white px-2 text-xs"
+            >
+              {STATUS_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label
+              htmlFor="filter-hours"
+              className="mono text-[10px] uppercase tracking-wider text-zinc-400"
+            >
+              Janela
+            </label>
+            <select
+              id="filter-hours"
+              name="hours"
+              defaultValue={String(hours)}
+              className="h-8 rounded-md border border-zinc-200 bg-white px-2 text-xs"
+            >
+              <option value="1">1h</option>
+              <option value="24">24h</option>
+              <option value="168">7 dias</option>
+              <option value="720">30 dias</option>
+            </select>
+          </div>
+          <button
+            type="submit"
+            className="h-8 px-3 rounded-md bg-zinc-900 text-white text-xs font-medium"
+          >
+            Filtrar
+          </button>
+          {(filters.endpoint || filters.apiKeyId || filters.status) && (
+            <a
+              href={`/workspaces/${workspace.id}/access`}
+              className="h-8 px-3 rounded-md border border-zinc-200 text-xs text-zinc-600 inline-flex items-center"
+            >
+              limpar
+            </a>
+          )}
+        </form>
+
         {logs.length === 0 ? (
           <div className="floating-panel p-6 text-center">
-            <p className="text-xs text-zinc-500">Sem chamadas nas últimas 24h.</p>
+            <p className="text-xs text-zinc-500">
+              Sem chamadas que batam com o filtro.
+            </p>
           </div>
         ) : (
           <div className="floating-panel overflow-hidden">
@@ -188,11 +342,12 @@ export default async function AccessPage({
                     <th className="px-3 py-2 text-right">Blocos</th>
                     <th className="px-3 py-2 text-right">Tokens</th>
                     <th className="px-3 py-2 text-right">Tempo</th>
+                    <th className="px-3 py-2" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-50">
                   {logs.map((l) => (
-                    <tr key={l.id}>
+                    <tr key={l.id} className="hover:bg-zinc-50">
                       <td className="px-3 py-1.5 mono text-[10px] text-zinc-500">
                         {new Date(l.createdAt).toLocaleTimeString('pt-BR')}
                       </td>
@@ -220,6 +375,14 @@ export default async function AccessPage({
                       </td>
                       <td className="px-3 py-1.5 mono text-[10px] text-right">
                         {l.durationMs}ms
+                      </td>
+                      <td className="px-3 py-1.5 text-right">
+                        <Link
+                          href={`/workspaces/${workspace.id}/traces/${l.id}`}
+                          className="mono text-[10px] text-zinc-400 hover:text-zinc-900"
+                        >
+                          ver →
+                        </Link>
                       </td>
                     </tr>
                   ))}
