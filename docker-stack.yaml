@@ -1,0 +1,94 @@
+version: "3.8"
+
+# ContextOS — Docker Swarm stack para deploy no servidor IDEVA.
+# Padrão alinhado com InstaPost: reusa infra_postgres compartilhado,
+# Redis dedicado por stack, Traefik labels pra roteamento via Cloudflare tunnel.
+#
+# Vars exigidas em .env.stack (não commitado):
+#   CONTEXTOS_DB_PASSWORD   — senha do role contextos no infra_postgres
+#   CONTEXTOS_SESSION_SECRET — string aleatória 32+ chars (cookie session)
+#   OPENAI_API_KEY          — opcional, ativa embeddings reais (sem ela = fallback ILIKE)
+#   STORAGE_DIR             — path absoluto no host pra docs (montado como volume)
+#
+# Deploy:
+#   docker stack deploy -c docker-stack.yaml --with-registry-auth contextos
+
+services:
+  web:
+    image: contextos-web:latest
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://contextos:${CONTEXTOS_DB_PASSWORD}@infra_postgres:5432/contextos
+      REDIS_URL: redis://contextos_redis:6379
+      SESSION_SECRET: ${CONTEXTOS_SESSION_SECRET}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-openai}
+      STORAGE_DIR: /data/storage
+      RATE_LIMIT_PER_MIN: ${RATE_LIMIT_PER_MIN:-100}
+      NEXT_TELEMETRY_DISABLED: "1"
+    volumes:
+      - contextos_storage:/data/storage
+    networks:
+      - network_public
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=network_public
+        - "traefik.http.routers.contextos-web.rule=Host(`contextos.onexos.com.br`)"
+        - traefik.http.routers.contextos-web.entrypoints=web
+        - traefik.http.routers.contextos-web.service=contextos-web
+        - traefik.http.services.contextos-web.loadbalancer.server.port=3000
+
+  worker:
+    image: contextos-worker:latest
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://contextos:${CONTEXTOS_DB_PASSWORD}@infra_postgres:5432/contextos
+      REDIS_URL: redis://contextos_redis:6379
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-openai}
+      STORAGE_DIR: /data/storage
+      LOG_LEVEL: info
+    volumes:
+      - contextos_storage:/data/storage
+    networks:
+      - network_public
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - contextos_redis_data:/data
+    networks:
+      - network_public
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+
+volumes:
+  contextos_storage:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/HC_Volume_105094036/contextos/storage
+  contextos_redis_data:
+
+networks:
+  network_public:
+    external: true
+    name: network_public
