@@ -18,6 +18,7 @@ import {
 import '@xyflow/react/dist/style.css'
 import { type DragEvent, useCallback, useMemo, useRef, useState } from 'react'
 
+import { CompilePanel } from './compile-panel'
 import { ContextNode } from './context-node'
 import { DocumentsPanel } from './documents-panel'
 import { NodePalette, type PaletteDragPayload } from './node-palette'
