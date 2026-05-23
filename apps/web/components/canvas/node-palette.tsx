@@ -87,7 +87,7 @@ export type PaletteDragPayload = {
 }
 
 export function NodePalette() {
-  function handleDragStart(event: DragEvent<HTMLDivElement>, item: PaletteItem) {
+  function handleDragStart(event: DragEvent<HTMLElement>, item: PaletteItem) {
     const payload: PaletteDragPayload = {
       type: item.type,
       defaultMode: item.defaultMode,
