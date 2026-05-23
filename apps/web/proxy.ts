@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { verifySessionToken } from '@/lib/auth'
 import { SESSION_COOKIE } from '@/lib/session'
 
-const PROTECTED_PREFIXES = ['/dashboard', '/workspaces', '/projects']
+const PROTECTED_PREFIXES = ['/dashboard', '/workspaces', '/projects', '/brains']
 const AUTH_PREFIXES = ['/login', '/signup']
 
 function startsWithAny(pathname: string, prefixes: string[]): boolean {

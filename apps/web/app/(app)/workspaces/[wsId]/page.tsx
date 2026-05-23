@@ -1,6 +1,9 @@
 import Link from 'next/link'
+import { BrainCreateForm } from '@/components/brain-create-form'
+import { BrainDeleteForm } from '@/components/brain-delete-form'
 import { ProjectCreateForm } from '@/components/project-create-form'
 import { ProjectDeleteForm } from '@/components/project-delete-form'
+import { listBrainsForProject } from '@/lib/brain'
 import { requireWorkspace } from '@/lib/guards'
 import { listProjectsForWorkspace } from '@/lib/project'
 
@@ -12,6 +15,12 @@ export default async function WorkspaceDetailPage({
   const { wsId } = await params
   const { workspace } = await requireWorkspace(wsId)
   const projects = await listProjectsForWorkspace(workspace.id)
+  const brainsPerProject = await Promise.all(
+    projects.map(async (p) => ({
+      project: p,
+      brains: await listBrainsForProject(p.id)
+    }))
+  )
 
   return (
     <div className="space-y-8">
@@ -42,25 +51,57 @@ export default async function WorkspaceDetailPage({
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {projects.map((proj) => (
-              <div
-                key={proj.id}
-                className="floating-panel p-4 flex items-center justify-between gap-4"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="font-medium text-sm truncate">{proj.name}</div>
-                  {proj.description && (
-                    <div className="text-xs text-zinc-500 mt-0.5 truncate">
-                      {proj.description}
-                    </div>
-                  )}
+          <div className="space-y-3">
+            {brainsPerProject.map(({ project: proj, brains }) => (
+              <div key={proj.id} className="floating-panel p-4 space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-sm truncate">{proj.name}</div>
+                    {proj.description && (
+                      <div className="text-xs text-zinc-500 mt-0.5 truncate">
+                        {proj.description}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <span className="mono text-[10px] text-zinc-400">
+                      {new Date(proj.createdAt).toLocaleDateString('pt-BR')}
+                    </span>
+                    <ProjectDeleteForm projectId={proj.id} />
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="mono text-[10px] text-zinc-400">
-                    {new Date(proj.createdAt).toLocaleDateString('pt-BR')}
-                  </span>
-                  <ProjectDeleteForm projectId={proj.id} />
+
+                <div className="border-t border-zinc-100 pt-3 space-y-2">
+                  <div className="mono text-[10px] uppercase tracking-wider text-zinc-400">
+                    Cérebros · {brains.length}
+                  </div>
+                  {brains.length === 0 ? (
+                    <p className="text-[11px] text-zinc-500">
+                      Sem cérebros nesse projeto ainda.
+                    </p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {brains.map((b) => (
+                        <li
+                          key={b.id}
+                          className="flex items-center justify-between gap-3 px-2 py-1.5 rounded hover:bg-zinc-50"
+                        >
+                          <Link
+                            href={`/brains/${b.id}`}
+                            className="flex items-center gap-2 min-w-0 flex-1"
+                          >
+                            <span
+                              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                              style={{ background: '#C5F432' }}
+                            />
+                            <span className="text-xs truncate">{b.name}</span>
+                          </Link>
+                          <BrainDeleteForm brainId={b.id} />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <BrainCreateForm projectId={proj.id} />
                 </div>
               </div>
             ))}
