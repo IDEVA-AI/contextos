@@ -20,7 +20,7 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://contextos:${CONTEXTOS_DB_PASSWORD}@infra_postgres:5432/contextos
       REDIS_URL: redis://contextos_redis:6379
-      SESSION_SECRET: ${CONTEXTOS_SESSION_SECRET}
+      NEXTAUTH_SECRET: ${CONTEXTOS_SESSION_SECRET}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-openai}
       STORAGE_DIR: /data/storage
