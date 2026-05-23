@@ -4,6 +4,10 @@
 
 **"Modelos são substituíveis. Contexto proprietário não é."**
 
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
+[![MVP](https://img.shields.io/badge/MVP-v0.1.0-C5F432.svg)](#status)
+[![Self-hosted](https://img.shields.io/badge/self--hosted-docker--compose-zinc.svg)](./docs/self-hosting.md)
+
 ---
 
 ## O que é
@@ -22,26 +26,26 @@ Quando uma IA pergunta "qual o contexto pra atender o cliente Delta?", o Context
 5. Comprime pro budget de tokens
 6. Devolve pacote pronto pra IA usar — com trace de auditoria
 
-📖 [PRD completo](./PRD_v0.1.md) · [Briefing original](./briefing_plataforma_inteligencia_contextual.md)
+📖 [PRD completo](./PRD_v0.1.md) · [Architecture](./docs/architecture.md) · [API Reference](./docs/api-reference.md) · [MCP Guide](./docs/mcp-guide.md) · [Self-hosting](./docs/self-hosting.md)
 
 ---
 
-## Status
+## Status — **MVP v0.1.0 completo** ✓
 
-🚧 **Em desenvolvimento ativo.** Sprint 0 (fundação). v0.1 MVP planejado pra ~7-10 semanas.
-
-| Sprint | Foco | Status |
+| Sprint | Entrega | Status |
 |---|---|---|
-| 0 | Fundação (mono-repo, docker, scaffold) | 🟡 em andamento |
-| 1 | Auth + Workspace | ⚪ |
-| 2 | Canvas básico (React Flow + 7 tipos de nó) | ⚪ |
-| 3 | Documents + Knowledge indexing | ⚪ |
-| 4 | Memory CRUD | ⚪ |
-| 5 | Context Compiler (8-step pipeline) | ⚪ |
-| 6 | RBAC + API Keys | ⚪ |
-| 7 | MCP Server (5 tools) | ⚪ |
-| 8 | Trace UI + polish | ⚪ |
-| 9 | Hardening + docs | ⚪ |
+| 0 | Fundação (mono-repo, Docker, scaffold) | ✅ |
+| 1 | Auth + Workspaces + Projetos | ✅ |
+| 2 | Canvas builder (React Flow + 7 tipos de nó + auto-save + versions) | ✅ |
+| 3 | Documents + Worker (PDF/MD/TXT → chunks + embeddings) | ✅ |
+| 4 | Memory CRUD + busca semântica pgvector | ✅ |
+| 5 | Context Compiler (8-step pipeline + cache + 4 formatos) | ✅ |
+| 6 | API Keys + Bearer auth + RBAC tag-based | ✅ |
+| 7 | **MCP Server** — Claude Desktop / Cursor / Cline plugam | ✅ |
+| 8 | Trace UI + filtros + CSV + botão "Testar com IA" + templates | ✅ |
+| 9 | Rate limit + health + backup + CI + docs completas | ✅ |
+
+**Repo público**: https://github.com/IDEVA-AI/contextos
 
 ---
 
@@ -50,56 +54,79 @@ Quando uma IA pergunta "qual o contexto pra atender o cliente Delta?", o Context
 | Camada | Tech |
 |---|---|
 | Frontend + Backend | Next.js 16 (App Router + Route Handlers) |
-| Canvas visual | React Flow + shadcn/ui + TailwindCSS |
+| Canvas | `@xyflow/react` 12 |
+| UI | shadcn-style + TailwindCSS 4 |
 | State | Zustand + TanStack Query |
-| Banco | PostgreSQL 16 + pgvector |
-| ORM | Drizzle |
-| Cache + Queue | Redis + BullMQ |
-| LLM | `@anthropic-ai/sdk` + Vercel AI SDK |
-| MCP | `@modelcontextprotocol/sdk` |
-| PDF | unpdf |
+| Banco | PostgreSQL 16 + pgvector (HNSW) |
+| ORM | Drizzle 0.45 |
+| Cache + Queue | Redis 7 + BullMQ 5 |
+| LLM | `@anthropic-ai/sdk` 0.98 + `openai` 6.39 |
+| MCP | `@modelcontextprotocol/sdk` 1.29 |
+| PDF | unpdf 1.6 |
+| Auth | bcrypt + jose (JWT) |
 | Logs | Pino |
 | Infra | Docker Compose + Caddy |
 
-Detalhes: [PRD §7](./PRD_v0.1.md#7-arquitetura-técnica).
+Detalhes: [architecture.md](./docs/architecture.md).
 
 ---
 
 ## Setup (dev local)
 
-### Pré-requisitos
-- Node ≥20 ([.nvmrc](./.nvmrc))
-- pnpm 10+
-- Docker + Docker Compose
-- git
-
-### Subir o ambiente
-
 ```bash
-# 1. Clone
 git clone https://github.com/IDEVA-AI/contextos.git
 cd contextos
-
-# 2. Subir infra local (Postgres + pgvector + Redis)
-pnpm infra:up
-
-# 3. Instalar dependências
+pnpm infra:up                            # Postgres+pgvector + Redis
 pnpm install
-
-# 4. Configurar env
 cp .env.example .env.local
-# Edite .env.local: ANTHROPIC_API_KEY ou OPENAI_API_KEY
+ln -sf ../../.env.local apps/web/.env.local
+pnpm db:push                             # cria 12 tabelas
+pnpm dev                                 # http://localhost:3000
 
-# 5. Rodar migrations
-pnpm db:push
-
-# 6. Subir dev server
-pnpm dev
+# em outro terminal:
+pnpm --filter @contextos/worker dev      # processa indexação
 ```
 
-Acesse: http://localhost:3000
+Detalhes em [docs/self-hosting.md](./docs/self-hosting.md).
 
-> **Portas locais:** Postgres em `5436`, Redis em `6381` (fora do padrão pra evitar conflito com outros projetos rodando Postgres/Redis no mesmo host).
+> **Portas locais**: Postgres em `5436`, Redis em `6381` (fora do padrão pra evitar conflito).
+
+---
+
+## Setup (self-hosted produção)
+
+```bash
+cp .env.example .env
+# define PUBLIC_URL, POSTGRES_PASSWORD, NEXTAUTH_SECRET
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml exec web pnpm db:push
+```
+
+Caddy serve HTTPS automático no `PUBLIC_URL`. Backup automático via `docker/backup-postgres.sh` + cron.
+
+---
+
+## Plugar Claude Desktop em 4 passos
+
+1. Cria API key em `/workspaces/[id]/access`
+2. Edita `~/Library/Application Support/Claude/claude_desktop_config.json`:
+   ```json
+   {
+     "mcpServers": {
+       "contextos": {
+         "transport": {
+           "type": "streamable-http",
+           "url": "http://localhost:3000/mcp",
+           "headers": { "Authorization": "Bearer ctx_sk_live_xxx" }
+         }
+       }
+     }
+   }
+   ```
+3. Restart Claude Desktop
+4. No chat: "liste os cérebros disponíveis"
+
+Detalhes: [docs/mcp-guide.md](./docs/mcp-guide.md).
 
 ---
 
@@ -107,21 +134,26 @@ Acesse: http://localhost:3000
 
 ```
 contextos/
-├── apps/
-│   └── web/                # Next.js 16 (frontend + API + MCP)
+├── apps/web/                # Next.js 16 (frontend + API + MCP server)
 ├── packages/
-│   ├── db/                 # Drizzle schema + migrations
-│   ├── core/               # Context Compiler + lógica de domínio
-│   ├── mcp/                # MCP server lib
-│   └── worker/             # BullMQ jobs (indexação)
+│   ├── db/                  # Drizzle schema + migrations (12 tabelas)
+│   ├── core/                # Storage, chunking, extractors, embeddings
+│   ├── mcp/                 # placeholder pra futura extração
+│   └── worker/              # BullMQ jobs (indexação de docs)
 ├── docker/
 │   ├── Dockerfile.web
 │   ├── Dockerfile.worker
-│   └── Caddyfile
-├── docker-compose.yml      # Dev (Postgres + Redis)
-├── docker-compose.prod.yml # Self-hosted full stack
-├── PRD_v0.1.md             # Spec completa do produto
-└── briefing_plataforma_inteligencia_contextual.md
+│   ├── Caddyfile
+│   └── backup-postgres.sh
+├── docs/
+│   ├── architecture.md
+│   ├── api-reference.md
+│   ├── self-hosting.md
+│   ├── mcp-guide.md
+│   └── getting-started.md
+├── docker-compose.yml       # Dev local (Postgres + Redis)
+├── docker-compose.prod.yml  # Self-hosted full stack
+└── PRD_v0.1.md              # Spec completa do produto
 ```
 
 ---
@@ -136,6 +168,20 @@ contextos/
 | mem0 / Letta | Memory APIs headless | Canvas visual + hierarquia + RBAC + MCP nativo. |
 
 ContextOS é a primeira plataforma que combina **canvas visual + contexto-como-primitiva + hierarquia/escopo/prioridade + API plugável universal (REST + MCP + Webhook)**.
+
+---
+
+## Próximas evoluções (pós-MVP)
+
+- Sumarização LLM no Compiler
+- Conflict-judge LLM (detecção semântica)
+- Agentes executáveis (Tool, Router, Validator nodes)
+- Integrações específicas (Drive, Notion, n8n) via conectores
+- OpenAPI Actions (Custom GPT)
+- SDK oficial TS/Python
+- Diff visual de versões
+- Multi-tenant + SSO/SAML
+- Cloud hospedado (oferta managed)
 
 ---
 

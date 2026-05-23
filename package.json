@@ -2,6 +2,7 @@
   "name": "contextos",
   "private": true,
   "version": "0.1.0",
+  "description": "Servidor de contexto operacional plugavel. Modele cerebro uma vez, qualquer IA consome via REST/MCP/Webhook.",
   "license": "Apache-2.0",
   "packageManager": "pnpm@10.32.1",
   "engines": {

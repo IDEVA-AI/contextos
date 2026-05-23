@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm type-check
+
+  build:
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: contextos
+          POSTGRES_PASSWORD: contextos_dev
+          POSTGRES_DB: contextos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U contextos"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+
+    env:
+      DATABASE_URL: postgres://contextos:contextos_dev@localhost:5432/contextos
+      REDIS_URL: redis://localhost:6379
+      NEXTAUTH_SECRET: ci_test_secret_at_least_32_characters_long
+      NEXTAUTH_URL: http://localhost:3000
+      STORAGE_DIR: /tmp/contextos-storage
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Enable pgvector extension
+        run: |
+          PGPASSWORD=contextos_dev psql -h localhost -U contextos -d contextos -c 'CREATE EXTENSION IF NOT EXISTS vector;'
+
+      - name: Push schema
+        run: pnpm db:push
+
+      - name: Build
+        run: pnpm build
