@@ -130,6 +130,20 @@ Detalhes: [docs/mcp-guide.md](./docs/mcp-guide.md).
 
 ---
 
+## Terminal client (`@contextos/cli`)
+
+```bash
+pnpm --filter @contextos/cli build
+node packages/cli/dist/index.js auth login   # interactive
+node packages/cli/dist/index.js brains list -w <workspace_id>
+node packages/cli/dist/index.js compile <brainId> -w <ws> -q "proposta"
+node packages/cli/dist/index.js docs upload <brainId> ./manual.pdf
+```
+
+Detalhes: [docs/cli-guide.md](./docs/cli-guide.md).
+
+---
+
 ## Estrutura
 
 ```
@@ -139,6 +153,7 @@ contextos/
 │   ├── db/                  # Drizzle schema + migrations (12 tabelas)
 │   ├── core/                # Storage, chunking, extractors, embeddings
 │   ├── mcp/                 # placeholder pra futura extração
+│   ├── cli/                 # @contextos/cli — terminal client (bin: contextos)
 │   └── worker/              # BullMQ jobs (indexação de docs)
 ├── docker/
 │   ├── Dockerfile.web
@@ -150,6 +165,7 @@ contextos/
 │   ├── api-reference.md
 │   ├── self-hosting.md
 │   ├── mcp-guide.md
+│   ├── cli-guide.md
 │   └── getting-started.md
 ├── docker-compose.yml       # Dev local (Postgres + Redis)
 ├── docker-compose.prod.yml  # Self-hosted full stack

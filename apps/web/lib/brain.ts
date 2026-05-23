@@ -27,6 +27,32 @@ export async function listBrainsForProject(projectId: string): Promise<BrainSumm
     .orderBy(asc(schema.brains.createdAt))
 }
 
+export type BrainWithProject = BrainSummary & {
+  projectName: string
+  workspaceId: string
+}
+
+export async function listBrainsForWorkspace(
+  workspaceId: string
+): Promise<BrainWithProject[]> {
+  return db
+    .select({
+      id: schema.brains.id,
+      projectId: schema.brains.projectId,
+      name: schema.brains.name,
+      description: schema.brains.description,
+      currentVersionId: schema.brains.currentVersionId,
+      createdAt: schema.brains.createdAt,
+      updatedAt: schema.brains.updatedAt,
+      projectName: schema.projects.name,
+      workspaceId: schema.projects.workspaceId
+    })
+    .from(schema.brains)
+    .innerJoin(schema.projects, eq(schema.projects.id, schema.brains.projectId))
+    .where(eq(schema.projects.workspaceId, workspaceId))
+    .orderBy(asc(schema.brains.createdAt))
+}
+
 export async function getBrainByIdForUser(
   brainId: string,
   userId: string

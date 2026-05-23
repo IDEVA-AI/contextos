@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { ensureScopeAccess, searchMemoriesSemantic } from '@/lib/memory'
-import { getCurrentSession } from '@/lib/session'
+import { authenticateV1Request } from '@/lib/v1-auth'
 
 // Conforme PRD §9.4
 
@@ -15,8 +15,8 @@ const SearchSchema = z.object({
 })
 
 export async function POST(req: Request) {
-  const session = await getCurrentSession()
-  if (!session) {
+  const auth = await authenticateV1Request(req)
+  if (!auth) {
     return NextResponse.json({ error: 'unauthenticated' }, { status: 401 })
   }
   const body = await req.json().catch(() => ({}))
@@ -28,10 +28,14 @@ export async function POST(req: Request) {
     )
   }
 
+  if (auth.source === 'api_key' && auth.workspaceId !== parsed.data.workspace_id) {
+    return NextResponse.json({ error: 'workspace_mismatch' }, { status: 403 })
+  }
+
   const ok = await ensureScopeAccess({
     scopeType: parsed.data.scope_type,
     scopeId: parsed.data.scope_id,
-    userId: session.userId
+    userId: auth.userId
   })
   if (!ok) {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 })

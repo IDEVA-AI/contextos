@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { compileContext, type CompileInput } from '@/lib/compiler'
-import { getCurrentSession } from '@/lib/session'
+import { authenticateV1Request } from '@/lib/v1-auth'
 import { getWorkspaceByIdForUser } from '@/lib/workspace'
 
 const RetrieveSchema = z.object({
@@ -15,8 +15,8 @@ const RetrieveSchema = z.object({
 })
 
 export async function POST(req: Request) {
-  const session = await getCurrentSession()
-  if (!session) {
+  const auth = await authenticateV1Request(req)
+  if (!auth) {
     return NextResponse.json({ error: 'unauthenticated' }, { status: 401 })
   }
 
@@ -29,7 +29,11 @@ export async function POST(req: Request) {
     )
   }
 
-  const ws = await getWorkspaceByIdForUser(parsed.data.workspace_id, session.userId)
+  if (auth.source === 'api_key' && auth.workspaceId !== parsed.data.workspace_id) {
+    return NextResponse.json({ error: 'workspace_mismatch' }, { status: 403 })
+  }
+
+  const ws = await getWorkspaceByIdForUser(parsed.data.workspace_id, auth.userId)
   if (!ws) {
     return NextResponse.json({ error: 'workspace_not_found' }, { status: 404 })
   }
@@ -41,7 +45,8 @@ export async function POST(req: Request) {
     query: parsed.data.query,
     task: parsed.data.task,
     format: 'json',
-    budgetTokens: 999_999 // sem corte pra retrieve
+    budgetTokens: 999_999, // sem corte pra retrieve
+    apiKeyScopes: auth.source === 'api_key' ? auth.scopes : undefined
   }
 
   const result = await compileContext(input)

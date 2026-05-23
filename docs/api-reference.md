@@ -185,6 +185,93 @@ Usa cosine distance (pgvector) se OpenAI key configurado, senão fallback ILIKE.
 
 ---
 
+### `GET /v1/brains`
+
+Lista cérebros do workspace.
+
+**Query:** `?workspace_id=<uuid>` (obrigatório)
+
+**Auth:** Bearer ou cookie.
+
+**200:**
+```json
+{
+  "workspace_id": "uuid",
+  "brains": [
+    {
+      "id": "uuid",
+      "name": "Agente comercial",
+      "description": null,
+      "project_id": "uuid",
+      "project_name": "Vendas",
+      "current_version_id": "uuid|null",
+      "created_at": "ISO8601",
+      "updated_at": "ISO8601"
+    }
+  ],
+  "total": 1
+}
+```
+
+---
+
+### `GET /v1/documents`
+
+Lista documentos de um cérebro.
+
+**Query:** `?brain_id=<uuid>` (obrigatório)
+
+**Auth:** Bearer ou cookie.
+
+**200:**
+```json
+{
+  "brain_id": "uuid",
+  "documents": [
+    {
+      "id": "uuid",
+      "file_name": "manual.pdf",
+      "mime_type": "application/pdf",
+      "size_bytes": 12345,
+      "status": "ready",
+      "chunk_count": 42,
+      "created_at": "ISO8601"
+    }
+  ],
+  "total": 1
+}
+```
+
+### `POST /v1/documents`
+
+Upload (multipart/form-data). Worker indexa em background.
+
+**Form fields:**
+- `brain_id` (string, uuid) — obrigatório
+- `file` (binary, .pdf .md .txt, max 25MB) — obrigatório
+
+**Auth:** Bearer ou cookie.
+
+**201:**
+```json
+{
+  "id": "uuid",
+  "file_name": "...",
+  "mime_type": "...",
+  "size_bytes": 0,
+  "status": "uploading",
+  "created_at": "ISO8601"
+}
+```
+
+### `DELETE /v1/documents/{id}`
+
+Apaga documento + chunks indexados + arquivo no storage.
+
+**200:** `{ "ok": true }`
+
+---
+
 ## MCP `/mcp`
 
 Implementa Model Context Protocol v1 sobre HTTP streamable. Suportado por: Claude Desktop, Cursor, Cline, Zed, qualquer cliente MCP.
