@@ -39,11 +39,12 @@ const NODE_TYPES = {
 
 type Props = {
   brainId: string
+  workspaceId: string
   initialNodes: CanvasNode[]
   initialEdges: CanvasEdge[]
 }
 
-function CanvasInner({ brainId, initialNodes, initialEdges }: Props) {
+function CanvasInner({ brainId, workspaceId, initialNodes, initialEdges }: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState<CanvasNode>(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState<CanvasEdge>(initialEdges)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
@@ -144,6 +145,7 @@ function CanvasInner({ brainId, initialNodes, initialEdges }: Props) {
       <SaveIndicator status={status} lastSavedAt={lastSavedAt} />
       <VersionsPanel brainId={brainId} />
       <DocumentsPanel brainId={brainId} />
+      <CompilePanel brainId={brainId} workspaceId={workspaceId} />
       <PropertiesPanel
         node={selectedNode}
         onChange={updateNodeData}

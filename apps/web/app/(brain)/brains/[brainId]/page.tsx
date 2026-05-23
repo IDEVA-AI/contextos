@@ -49,6 +49,7 @@ export default async function BrainEditorPage({
       <div className="flex-1 relative">
         <CanvasEditor
           brainId={brain.id}
+          workspaceId={brain.workspaceId}
           initialNodes={nodes}
           initialEdges={edges}
         />
