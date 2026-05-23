@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Funil365 — Style Spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@1&family=Caveat:wght@400;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans:  ['Geist', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          mono:  ['"Geist Mono"', 'ui-monospace', 'monospace'],
+          serif: ['"Instrument Serif"', 'ui-serif', 'Georgia', 'serif'],
+          caveat:['"Caveat"', '"Geist"', 'sans-serif'],
+        },
+        colors: {
+          brand: {
+            DEFAULT: '#C5F432',
+            50:'#F7FEDB', 100:'#EEFCB6', 200:'#DDF878', 300:'#C5F432',
+            400:'#A6E517', 500:'#84BD11', 600:'#65900E', 700:'#48680A',
+          },
+          status: {
+            planned: '#A1A1AA',
+            production: '#F59E0B',
+            active: '#84BD11',
+            paused: '#EF4444',
+          },
+        },
+        boxShadow: {
+          float:    '0 1px 2px rgba(15,15,15,0.04), 0 8px 24px -8px rgba(15,15,15,0.12)',
+          'float-lg':'0 2px 4px rgba(15,15,15,0.04), 0 16px 40px -12px rgba(15,15,15,0.18)',
+          sticky:   '0 1px 1px rgba(0,0,0,0.06), 0 6px 12px -4px rgba(0,0,0,0.08), inset 0 -2px 0 rgba(0,0,0,0.04)',
+        },
+        keyframes: {
+          'fade-in-up': { '0%':{opacity:'0',transform:'translateY(8px)'}, '100%':{opacity:'1',transform:'translateY(0)'} },
+          'scale-in':   { '0%':{opacity:'0',transform:'scale(0.92)'},      '100%':{opacity:'1',transform:'scale(1)'} },
+          'dash':       { to:{strokeDashoffset:'-12'} },
+          'pulse-brand':{ '0%,100%':{boxShadow:'0 0 0 0 rgba(197,244,50,0.45)'}, '50%':{boxShadow:'0 0 0 8px rgba(197,244,50,0)'} },
+        },
+        animation: {
+          'fade-in-up':'fade-in-up 220ms cubic-bezier(.16,1,.3,1) both',
+          'scale-in':  'scale-in 180ms cubic-bezier(.16,1,.3,1) both',
+          'dash':      'dash 1s linear infinite',
+          'pulse-brand':'pulse-brand 1.4s ease-out infinite',
+        },
+      }
+    }
+  }
+</script>
+<style>
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 4%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 75 91% 58%;
+    --destructive: 0 84% 60%;
+    --border: 240 6% 90%;
+    --ring: 75 91% 58%;
+    --radius: 0.5rem;
+  }
+  html, body { background:#FAFAF7; }
+  body {
+    font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11", "cv02";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    color: #0a0a0a;
+  }
+  ::selection { background:#c5f432; color:#0a0a0a; }
+  *::-webkit-scrollbar { width:10px; height:10px; }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.12);
+    border-radius:999px;
+    border:2px solid transparent;
+    background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.24); background-clip: padding-box; }
+
+  .font-display {
+    font-family:'Instrument Serif', ui-serif, Georgia, serif;
+    font-style: italic;
+    letter-spacing:-0.01em;
+  }
+  .brand-mark { font-weight:800; letter-spacing:-0.02em; }
+
+  .canvas-paper {
+    background-color:#FAFAF7;
+    background-image: radial-gradient(rgba(0,0,0,0.08) 1px, transparent 1px);
+    background-size:16px 16px;
+    background-position:-1px -1px;
+  }
+  .grain {
+    position:absolute; inset:0; pointer-events:none;
+    opacity:0.025; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  .floating-panel {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(228,228,231,0.8);
+    box-shadow: 0 1px 2px rgba(15,15,15,0.04), 0 8px 24px -8px rgba(15,15,15,0.12);
+    border-radius: 12px;
+  }
+  .btn-brand {
+    display:inline-flex; align-items:center; gap:.375rem;
+    padding:.375rem .75rem; border-radius:.375rem;
+    font-size:.875rem; font-weight:500;
+    background:#C5F432; color:#0a0a0a;
+    transition: background .15s ease;
+  }
+  .btn-brand:hover { background:#DDF878; }
+  .btn-brand:active { background:#A6E517; }
+
+  .edge-label {
+    font-family:'Geist Mono', ui-monospace, monospace;
+    font-size:10px; font-weight:500; color:#52525b;
+    background:#fff; padding:2px 6px; border-radius:4px;
+    border:1px solid #e4e4e7; box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  }
+
+  /* anchor offsets for sticky nav */
+  section[id] { scroll-margin-top: 72px; }
+
+  /* edge dasharray demo */
+  .edge-path {
+    stroke:#a1a1aa; stroke-width:1.5; fill:none;
+    stroke-dasharray:6 4;
+    animation: dash 1.6s linear infinite;
+  }
+  .edge-path.selected { stroke:#84bd11; }
+  @keyframes dash { to { stroke-dashoffset:-20; } }
+
+  /* token cell */
+  .swatch { width:100%; aspect-ratio:1.4; border-radius:8px; border:1px solid rgba(0,0,0,0.06); }
+  .swatch-row { display:grid; gap:8px; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); }
+
+  /* Atomic shapes */
+  .shape-traffic    { border-radius:14px; transform:rotate(45deg); }
+  .shape-traffic > * { transform: rotate(-45deg); }
+  .shape-remarketing{ border-radius:14px; transform:rotate(45deg); }
+  .shape-remarketing > * { transform: rotate(-45deg); }
+  .shape-nurture    { border-radius:9999px; }
+  .shape-audience   { border-radius:999px; }
+  .shape-automation { border-radius:12px; }
+  .shape-logic      { border-radius:6px; transform:rotate(45deg); }
+  .shape-logic > *  { transform: rotate(-45deg); }
+  .shape-utility    { border-radius:6px; }
+
+  .pulse-brand { animation: pulseBrand 1.4s ease-out infinite; }
+  @keyframes pulseBrand {
+    0%,100% { box-shadow: 0 0 0 0 rgba(197,244,50,0.45); }
+    50%     { box-shadow: 0 0 0 8px rgba(197,244,50,0); }
+  }
+
+  .h-rule { height:1px; background: linear-gradient(to right, transparent, rgba(0,0,0,0.08), transparent); }
+
+  .mono { font-family:'Geist Mono', ui-monospace, monospace; }
+  .display { font-family:'Instrument Serif', serif; font-style:italic; }
+
+  /* navigation */
+  .topnav a { color:#52525b; }
+  .topnav a:hover { color:#0a0a0a; }
+
+  /* connect-mode demo nodes opacity */
+  .demo-cm .node-dimmed { opacity:0.55; transition: opacity .16s ease, filter .16s ease; }
+  .demo-cm .node-dimmed:hover { opacity:1; filter: drop-shadow(0 0 0 2px #C5F432); }
+
+  details > summary { list-style:none; cursor:pointer; }
+  details > summary::-webkit-details-marker { display:none; }
+</style>
+</head>
+<body class="text-zinc-900">
+
+<!-- ─────────────────────── TOP NAV ─────────────────────── -->
+<header class="sticky top-0 z-50 backdrop-blur-md bg-white/85 border-b border-zinc-200/70">
+  <div class="max-w-7xl mx-auto px-6 h-14 flex items-center gap-6">
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center justify-center w-7 h-7 rounded-md" style="background:#C5F432">
+        <svg viewBox="0 0 24 24" class="w-4 h-4 text-zinc-900" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
+      <span class="brand-mark text-base">FUNILFLOW</span>
+      <span class="text-[10px] mono text-zinc-400 ml-1">· STYLE SPEC v1</span>
+    </div>
+    <nav class="topnav hidden md:flex items-center gap-4 text-xs ml-auto">
+      <a href="#principios">Princípios</a>
+      <a href="#cor">Cor</a>
+      <a href="#tipografia">Tipografia</a>
+      <a href="#spacing">Spacing</a>
+      <a href="#raio">Raio</a>
+      <a href="#sombra">Sombra</a>
+      <a href="#motion">Motion</a>
+      <a href="#componentes">Componentes</a>
+      <a href="#nos">Nós</a>
+      <a href="#interacoes">Interações</a>
+      <a href="#antipadroes">Anti-padrões</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ─────────────────────── HERO ─────────────────────── -->
+<section class="canvas-paper relative border-b border-zinc-200/70 overflow-hidden">
+  <div class="grain"></div>
+  <div class="max-w-7xl mx-auto px-6 py-20 relative">
+    <div class="text-[11px] mono uppercase tracking-[0.2em] text-zinc-500 mb-3">Funil365 · Design System</div>
+    <h1 class="text-5xl md:text-6xl font-semibold tracking-tight mb-2">
+      Style Spec, <span class="display text-zinc-500">no detalhe</span>
+    </h1>
+    <p class="text-zinc-600 max-w-2xl mt-3 leading-relaxed">
+      Espelho vivo do código. Tokens, classes, componentes — extraídos de
+      <span class="mono text-xs bg-zinc-100 px-1.5 py-0.5 rounded">tailwind.config.ts</span>,
+      <span class="mono text-xs bg-zinc-100 px-1.5 py-0.5 rounded">index.css</span>,
+      <span class="mono text-xs bg-zinc-100 px-1.5 py-0.5 rounded">packages/shared</span> e
+      <span class="mono text-xs bg-zinc-100 px-1.5 py-0.5 rounded">components/canvas/**</span>.
+      Estética canvas-on-paper. Um verde. Geist + Instrument Serif italic.
+    </p>
+
+    <div class="mt-8 flex flex-wrap items-center gap-3">
+      <button class="btn-brand">
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="5 12 10 17 19 8"/></svg>
+        btn-brand canônico
+      </button>
+      <span class="floating-panel inline-flex items-center gap-2 px-3 py-1.5 text-xs">
+        <span class="w-2 h-2 rounded-full" style="background:#84BD11; box-shadow:0 0 0 2px white, 0 0 0 4px rgba(197,244,50,.45)"></span>
+        floating-panel · 12px radius · white/95 + blur
+      </span>
+      <span class="mono text-[11px] text-zinc-500">snap 16px · easing cubic-bezier(.16,1,.3,1)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────── PRINCÍPIOS ─────────────────────── -->
+<section id="principios" class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">1 · Princípios</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Decisões fundadoras. Tudo o que segue se ancora aqui.</p>
+
+  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="floating-panel p-4">
+      <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-1">01</div>
+      <div class="font-medium mb-1">Floating-first</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Toda UI flutua sobre o canvas. white/95 + blur + shadow-float. Nada opaco grudado em borda.</p>
+    </div>
+    <div class="floating-panel p-4">
+      <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-1">02</div>
+      <div class="font-medium mb-1">Uma cor de marca</div>
+      <p class="text-xs text-zinc-600 leading-relaxed"><span class="mono">#C5F432</span> é o único verde. Selection, focus, active state, accent. Nada secundário.</p>
+    </div>
+    <div class="floating-panel p-4">
+      <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-1">03</div>
+      <div class="font-medium mb-1">Categoria = cor + forma</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Losango pra tráfego, círculo pra relacionamento, etc. Forma reforça categoria além da cor.</p>
+    </div>
+    <div class="floating-panel p-4">
+      <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-1">04</div>
+      <div class="font-medium mb-1">Família visual</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">atomic · page · sticky · text. Cada uma com proporção, sombra e edição própria. Não misturar.</p>
+    </div>
+    <div class="floating-panel p-4">
+      <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-1">05</div>
+      <div class="font-medium mb-1">Mockup-realismo</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Pages renderizam browser window (3 dots, URL, wireframe interno). Não retângulo abstrato.</p>
+    </div>
+    <div class="floating-panel p-4">
+      <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-1">06</div>
+      <div class="font-medium mb-1">Movimento contido</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">150–280ms · out-expo. Loops decorativos 1–1.6s. Nada de bounce, nada &gt; 400ms em UI funcional.</p>
+    </div>
+    <div class="floating-panel p-4">
+      <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-1">07</div>
+      <div class="font-medium mb-1">Snap 16px</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Grid, posição, padrão de fundo, padding. Tudo múltiplo de 16. Coerência espacial dogma.</p>
+    </div>
+    <div class="floating-panel p-4">
+      <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-1">08</div>
+      <div class="font-medium mb-1">pt-BR UI, EN código</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Labels de produto em português. Tokens, classes, identificadores em inglês.</p>
+    </div>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── COR ─────────────────────── -->
+<section id="cor" class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">2 · Cor</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Brand, neutros, surface, status, categorias. Tudo derivado do registro canônico.</p>
+
+  <!-- BRAND -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">2.1 · Brand (lime)</h3>
+  <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-10">
+    <!-- swatches -->
+    <div>
+      <div class="swatch" style="background:#F7FEDB"></div>
+      <div class="mt-2 text-[11px] font-medium">brand-50</div>
+      <div class="mono text-[10px] text-zinc-500">#F7FEDB</div>
+    </div>
+    <div>
+      <div class="swatch" style="background:#EEFCB6"></div>
+      <div class="mt-2 text-[11px] font-medium">brand-100</div>
+      <div class="mono text-[10px] text-zinc-500">#EEFCB6</div>
+    </div>
+    <div>
+      <div class="swatch" style="background:#DDF878"></div>
+      <div class="mt-2 text-[11px] font-medium">brand-200</div>
+      <div class="mono text-[10px] text-zinc-500">#DDF878</div>
+    </div>
+    <div>
+      <div class="swatch ring-2 ring-zinc-900 ring-offset-2" style="background:#C5F432"></div>
+      <div class="mt-2 text-[11px] font-medium">brand-300 · DEFAULT</div>
+      <div class="mono text-[10px] text-zinc-500">#C5F432</div>
+    </div>
+    <div>
+      <div class="swatch" style="background:#A6E517"></div>
+      <div class="mt-2 text-[11px] font-medium">brand-400</div>
+      <div class="mono text-[10px] text-zinc-500">#A6E517</div>
+    </div>
+    <div>
+      <div class="swatch" style="background:#84BD11"></div>
+      <div class="mt-2 text-[11px] font-medium">brand-500</div>
+      <div class="mono text-[10px] text-zinc-500">#84BD11</div>
+    </div>
+    <div>
+      <div class="swatch" style="background:#65900E"></div>
+      <div class="mt-2 text-[11px] font-medium">brand-600</div>
+      <div class="mono text-[10px] text-zinc-500">#65900E</div>
+    </div>
+    <div>
+      <div class="swatch" style="background:#48680A"></div>
+      <div class="mt-2 text-[11px] font-medium">brand-700</div>
+      <div class="mono text-[10px] text-zinc-500">#48680A</div>
+    </div>
+  </div>
+
+  <div class="floating-panel p-4 text-xs leading-relaxed text-zinc-700 mb-12">
+    <div class="font-medium mb-1">Regras de uso · brand</div>
+    <ul class="space-y-1 list-disc pl-5">
+      <li><span class="mono bg-zinc-100 px-1 rounded">brand-300</span> é a cor canônica. Selection, focus ring, resize handles, NodeResizer, pulse de status active, ring de hover em connect-mode.</li>
+      <li><span class="mono bg-zinc-100 px-1 rounded">brand-200</span>/<span class="mono bg-zinc-100 px-1 rounded">brand-400</span> apenas em hover/active do btn-brand.</li>
+      <li><span class="mono bg-zinc-100 px-1 rounded">brand-500</span> em edge selecionada (lê melhor sobre paper bege).</li>
+      <li>Texto sobre brand-300/400/200 = <span class="mono bg-zinc-100 px-1 rounded">zinc-900</span>. <strong>Nunca</strong> branco.</li>
+      <li>Brand nunca preenche superfície grande. É accent, não fundo de painel.</li>
+    </ul>
+  </div>
+
+  <!-- NEUTROS -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">2.2 · Neutros (zinc)</h3>
+  <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2 mb-6">
+    <!-- escala zinc -->
+    <template id="z"></template>
+  </div>
+  <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2 mb-6">
+    <div><div class="swatch border" style="background:#fafafa"></div><div class="mt-1 text-[10px] mono">zinc-50</div></div>
+    <div><div class="swatch" style="background:#f4f4f5"></div><div class="mt-1 text-[10px] mono">zinc-100</div></div>
+    <div><div class="swatch" style="background:#e4e4e7"></div><div class="mt-1 text-[10px] mono">zinc-200</div></div>
+    <div><div class="swatch" style="background:#d4d4d8"></div><div class="mt-1 text-[10px] mono">zinc-300</div></div>
+    <div><div class="swatch" style="background:#a1a1aa"></div><div class="mt-1 text-[10px] mono">zinc-400</div></div>
+    <div><div class="swatch" style="background:#71717a"></div><div class="mt-1 text-[10px] mono">zinc-500</div></div>
+    <div><div class="swatch" style="background:#52525b"></div><div class="mt-1 text-[10px] mono">zinc-600</div></div>
+    <div><div class="swatch" style="background:#3f3f46"></div><div class="mt-1 text-[10px] mono">zinc-700</div></div>
+    <div><div class="swatch" style="background:#27272a"></div><div class="mt-1 text-[10px] mono">zinc-800</div></div>
+    <div><div class="swatch" style="background:#0a0a0a"></div><div class="mt-1 text-[10px] mono text-zinc-500">zinc-900</div></div>
+  </div>
+
+  <div class="floating-panel p-4 text-xs mb-12 overflow-x-auto">
+    <table class="w-full text-left">
+      <thead class="text-[10px] mono uppercase tracking-wider text-zinc-400">
+        <tr><th class="py-1 pr-4">papel</th><th class="py-1 pr-4">token</th><th class="py-1">quando</th></tr>
+      </thead>
+      <tbody class="divide-y divide-zinc-100">
+        <tr><td class="py-1.5 pr-4 font-medium">Texto principal</td><td class="py-1.5 pr-4 mono text-zinc-600">zinc-900</td><td class="py-1.5 text-zinc-600">títulos, labels, conteúdo de nó</td></tr>
+        <tr><td class="py-1.5 pr-4 font-medium">Texto secundário</td><td class="py-1.5 pr-4 mono text-zinc-600">zinc-700</td><td class="py-1.5 text-zinc-600">botões de menu, body de item</td></tr>
+        <tr><td class="py-1.5 pr-4 font-medium">Texto terciário</td><td class="py-1.5 pr-4 mono text-zinc-600">zinc-600</td><td class="py-1.5 text-zinc-600">bottom-bar, ações idle</td></tr>
+        <tr><td class="py-1.5 pr-4 font-medium">Texto fraco</td><td class="py-1.5 pr-4 mono text-zinc-600">zinc-500</td><td class="py-1.5 text-zinc-600">tab idle do sidebar</td></tr>
+        <tr><td class="py-1.5 pr-4 font-medium">Placeholder/meta</td><td class="py-1.5 pr-4 mono text-zinc-600">zinc-400</td><td class="py-1.5 text-zinc-600">subtítulos, contadores mono, kicker labels</td></tr>
+        <tr><td class="py-1.5 pr-4 font-medium">Disabled</td><td class="py-1.5 pr-4 mono text-zinc-600">zinc-300</td><td class="py-1.5 text-zinc-600">botões disabled, "+ rótulo" da edge idle</td></tr>
+        <tr><td class="py-1.5 pr-4 font-medium">Divisor sutil</td><td class="py-1.5 pr-4 mono text-zinc-600">zinc-100</td><td class="py-1.5 text-zinc-600">divisor dentro de menu/painel</td></tr>
+        <tr><td class="py-1.5 pr-4 font-medium">Borda</td><td class="py-1.5 pr-4 mono text-zinc-600">zinc-200</td><td class="py-1.5 text-zinc-600">painel, mockup, edge label</td></tr>
+        <tr><td class="py-1.5 pr-4 font-medium">Hover item</td><td class="py-1.5 pr-4 mono text-zinc-600">zinc-100 (bg)</td><td class="py-1.5 text-zinc-600">hover de menu/lista</td></tr>
+        <tr><td class="py-1.5 pr-4 font-medium">Hover chip</td><td class="py-1.5 pr-4 mono text-zinc-600">zinc-50 (bg)</td><td class="py-1.5 text-zinc-600">hover de card na sidebar</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SURFACE -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">2.3 · Surface</h3>
+  <div class="grid md:grid-cols-2 gap-4 mb-12">
+    <!-- canvas demo -->
+    <div class="relative rounded-xl overflow-hidden border border-zinc-200 canvas-paper" style="height:200px">
+      <div class="grain"></div>
+      <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-white/80 to-transparent p-4">
+        <div class="text-[10px] mono uppercase tracking-wider text-zinc-500">.canvas-paper + .grain</div>
+        <div class="text-xs mono text-zinc-700">#FAFAF7 · dots rgba(0,0,0,0.08) 16×16 · grain opacity 0.025 multiply</div>
+      </div>
+    </div>
+    <!-- panel on canvas -->
+    <div class="relative rounded-xl overflow-hidden border border-zinc-200 canvas-paper" style="height:200px">
+      <div class="grain"></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="floating-panel px-4 py-3 text-xs">
+          <div class="font-medium">.floating-panel</div>
+          <div class="mono text-[10px] text-zinc-500 mt-0.5">white/95 · blur(md) · border zinc-200/80 · shadow-float · rounded-xl</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">2.4 · Status do nó</h3>
+  <div class="floating-panel p-4 mb-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full" style="background:#A1A1AA"></span>
+        <div>
+          <div class="text-xs font-medium">planned</div>
+          <div class="mono text-[10px] text-zinc-500">#A1A1AA · zinc-400</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full" style="background:#F59E0B"></span>
+        <div>
+          <div class="text-xs font-medium">production</div>
+          <div class="mono text-[10px] text-zinc-500">#F59E0B · amber-500</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full pulse-brand" style="background:#C5F432; box-shadow:0 0 0 2px white"></span>
+        <div>
+          <div class="text-xs font-medium">active</div>
+          <div class="mono text-[10px] text-zinc-500">brand-300 + ring + pulse-brand</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full" style="background:#EF4444"></span>
+        <div>
+          <div class="text-xs font-medium">paused</div>
+          <div class="mono text-[10px] text-zinc-500">#EF4444 · red-500</div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-4 pt-3 border-t border-zinc-100 text-[11px] text-zinc-500">
+      <strong class="text-zinc-700">Nota:</strong> Tailwind token <span class="mono">status.active</span> = <span class="mono">#84BD11</span>,
+      mas o dot do nó vivo renderiza <span class="mono">bg-brand-300 (#C5F432)</span>. Use brand-300 em UI ao vivo; <span class="mono">#84BD11</span> só como hex de fallback em código não-React.
+    </div>
+  </div>
+
+  <!-- CATEGORIAS -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">2.5 · Categorias de nó · 50+ tipos</h3>
+  <p class="text-xs text-zinc-500 mb-4">Cor canônica vem de <span class="mono">NODE_TYPES[kind].color</span>. Override do usuário via <span class="mono">data.color</span> (15 presets).</p>
+
+  <div class="space-y-6 mb-12">
+    <!-- Tráfego pago -->
+    <div>
+      <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-2">Tráfego pago · brand colors externas</div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#1877F2"></span><div><div class="text-[11px] font-medium">metaAds</div><div class="mono text-[9px] text-zinc-500">#1877F2</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#E1306C"></span><div><div class="text-[11px] font-medium">instagramAds</div><div class="mono text-[9px] text-zinc-500">#E1306C</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#4285F4"></span><div><div class="text-[11px] font-medium">googleAds</div><div class="mono text-[9px] text-zinc-500">#4285F4</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#FF0000"></span><div><div class="text-[11px] font-medium">youtubeAds</div><div class="mono text-[9px] text-zinc-500">#FF0000</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#010101"></span><div><div class="text-[11px] font-medium">tiktokAds</div><div class="mono text-[9px] text-zinc-500">#010101</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#0A66C2"></span><div><div class="text-[11px] font-medium">linkedinAds</div><div class="mono text-[9px] text-zinc-500">#0A66C2</div></div></div>
+      </div>
+    </div>
+
+    <!-- Tráfego orgânico -->
+    <div>
+      <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-2">Tráfego orgânico</div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#84cc16"></span><div><div class="text-[11px] font-medium">organic</div><div class="mono text-[9px] text-zinc-500">#84cc16</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#22c55e"></span><div><div class="text-[11px] font-medium">socialOrganic</div><div class="mono text-[9px] text-zinc-500">#22c55e</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#F97316"></span><div><div class="text-[11px] font-medium">influencer</div><div class="mono text-[9px] text-zinc-500">#F97316</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#f59e0b"></span><div><div class="text-[11px] font-medium">ad</div><div class="mono text-[9px] text-zinc-500">#f59e0b</div></div></div>
+      </div>
+    </div>
+
+    <!-- Remarketing -->
+    <div>
+      <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-2">Remarketing · overlay Repeat2</div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="relative w-7 h-7 rounded" style="background:#1877F2"><span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-white shadow flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-2 h-2" fill="none" stroke="black" stroke-width="3"><path d="M17 1l4 4-4 4M21 5H7a4 4 0 0 0-4 4M3 23l-4-4 4-4M3 19h14a4 4 0 0 0 4-4"/></svg></span></span><div><div class="text-[11px] font-medium">metaRmkt</div><div class="mono text-[9px] text-zinc-500">#1877F2</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#4285F4"></span><div><div class="text-[11px] font-medium">googleRmkt</div><div class="mono text-[9px] text-zinc-500">#4285F4</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#FF0000"></span><div><div class="text-[11px] font-medium">youtubeRmkt</div><div class="mono text-[9px] text-zinc-500">#FF0000</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#010101"></span><div><div class="text-[11px] font-medium">tiktokRmkt</div><div class="mono text-[9px] text-zinc-500">#010101</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#0F172A"></span><div><div class="text-[11px] font-medium">pixel</div><div class="mono text-[9px] text-zinc-500">#0F172A</div></div></div>
+        <div class="floating-panel p-2 flex items-center gap-2"><span class="w-7 h-7 rounded" style="background:#6366F1"></span><div><div class="text-[11px] font-medium">customAudience</div><div class="mono text-[9px] text-zinc-500">#6366F1</div></div></div>
+      </div>
+    </div>
+
+    <!-- Restante condensado -->
+    <details class="floating-panel p-4">
+      <summary class="flex items-center justify-between cursor-pointer">
+        <div class="text-xs font-medium">Demais categorias · 38 tipos restantes</div>
+        <span class="text-[10px] mono text-zinc-400">expandir ↓</span>
+      </summary>
+      <div class="mt-4 space-y-5">
+        <div>
+          <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-2">Captação</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#6366f1"></span><span class="text-[11px]">pageCapture · #6366f1</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#8b5cf6"></span><span class="text-[11px]">popup · #8b5cf6</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-2">Relacionamento</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#0ea5e9"></span><span class="text-[11px]">email · #0ea5e9</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#22c55e"></span><span class="text-[11px]">whatsapp · #22c55e</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#128C7E"></span><span class="text-[11px]">whatsappGroup · #128C7E</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#06b6d4"></span><span class="text-[11px]">sms · #06b6d4</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-2">Conversão</div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#ef4444"></span><span class="text-[11px]">salePage</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#dc2626"></span><span class="text-[11px]">checkout</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#f97316"></span><span class="text-[11px]">upsell</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#fb923c"></span><span class="text-[11px]">downsell</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#f59e0b"></span><span class="text-[11px]">orderBump</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#10b981"></span><span class="text-[11px]">thankyou</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-2">Entrega</div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#14b8a6"></span><span class="text-[11px]">members</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#F59E0B"></span><span class="text-[11px]">vipGroup</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#EF4444"></span><span class="text-[11px]">liveWebinar</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#0D9488"></span><span class="text-[11px]">lesson</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#6366F1"></span><span class="text-[11px]">download</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#0EA5E9"></span><span class="text-[11px]">onboarding</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-2">Público (audience)</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#F59E0B"></span><span class="text-[11px]">lead</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#EA580C"></span><span class="text-[11px]">hotLead</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#0EA5E9"></span><span class="text-[11px]">registered</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#8B5CF6"></span><span class="text-[11px]">student</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#10B981"></span><span class="text-[11px]">customer</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#6B7280"></span><span class="text-[11px]">lostLead</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#DC2626"></span><span class="text-[11px]">churn</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#94A3B8"></span><span class="text-[11px]">inactive</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-2">Automação</div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#DC2626"></span><span class="text-[11px]">cartAbandoned</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#8B5CF6"></span><span class="text-[11px]">automation</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#0EA5E9"></span><span class="text-[11px]">sendEmail</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#22C55E"></span><span class="text-[11px]">sendWhatsapp</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#06B6D4"></span><span class="text-[11px]">sendSms</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#6366F1"></span><span class="text-[11px]">addTag</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#94A3B8"></span><span class="text-[11px]">removeTag</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-2">Lógica · Auxiliares</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#94a3b8"></span><span class="text-[11px]">decision · #94a3b8</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#94a3b8"></span><span class="text-[11px]">delay · #94a3b8</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#fde68a"></span><span class="text-[11px]">note · #fde68a</span></div>
+            <div class="flex items-center gap-2"><span class="w-6 h-6 rounded" style="background:#71717A"></span><span class="text-[11px]">text · #71717A</span></div>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- COLOR PRESETS -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">2.6 · Color presets · override de usuário</h3>
+  <div class="floating-panel p-4 mb-4">
+    <div class="grid grid-cols-5 sm:grid-cols-10 lg:grid-cols-15 gap-2">
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#C5F432" title="#C5F432"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#84BD11" title="#84BD11"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#22C55E" title="#22C55E"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#0EA5E9" title="#0EA5E9"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#6366F1" title="#6366F1"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#8B5CF6" title="#8B5CF6"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#EC4899" title="#EC4899"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#EF4444" title="#EF4444"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#F97316" title="#F97316"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#F59E0B" title="#F59E0B"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#FDE68A" title="#FDE68A"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#14B8A6" title="#14B8A6"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#94A3B8" title="#94A3B8"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#0A0A0A" title="#0A0A0A"></button>
+      <button class="w-9 h-9 rounded-md border border-zinc-200 hover:scale-110 transition" style="background:#FFFFFF" title="#FFFFFF"></button>
+    </div>
+    <div class="mt-3 text-[11px] text-zinc-500">15 swatches · grid-cols-5 · w-7 h-7 · rounded-md · ring-2 ring-zinc-900 ring-offset-1 quando ativo</div>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── TIPOGRAFIA ─────────────────────── -->
+<section id="tipografia" class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">3 · Tipografia</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Geist (UI) + Geist Mono (técnico) + Instrument Serif italic (hero/floreio). Caveat só dentro de sticky.</p>
+
+  <div class="grid md:grid-cols-3 gap-3 mb-8">
+    <div class="floating-panel p-5">
+      <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-3">sans · Geist</div>
+      <div style="font-family:'Geist',sans-serif" class="text-3xl">Aa</div>
+      <div style="font-family:'Geist',sans-serif" class="mt-2 text-xs leading-relaxed text-zinc-600">The quick brown fox jumps over the lazy dog. 0123456789</div>
+      <div class="mt-3 mono text-[10px] text-zinc-400">features ss01, cv11, cv02 · antialiased</div>
+    </div>
+    <div class="floating-panel p-5">
+      <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-3">mono · Geist Mono</div>
+      <div class="mono text-3xl">Aa</div>
+      <div class="mono text-xs mt-2 leading-relaxed text-zinc-600">function() { return 42; }<br/>example.com/path · ⌘D</div>
+      <div class="mt-3 mono text-[10px] text-zinc-400">URLs, contadores, atalhos, kicker labels</div>
+    </div>
+    <div class="floating-panel p-5">
+      <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-3">serif italic · Instrument Serif</div>
+      <div class="display text-4xl">Aa</div>
+      <div class="display text-base mt-2 leading-relaxed text-zinc-600">uma tela em branco</div>
+      <div class="mt-3 mono text-[10px] text-zinc-400">.font-display · só hero/floreio · letter-spacing -0.01em</div>
+    </div>
+  </div>
+
+  <!-- escala de tamanho real -->
+  <div class="floating-panel p-5 mb-8 overflow-x-auto">
+    <div class="text-[10px] mono uppercase tracking-wider text-zinc-400 mb-4">Escala usada · do menor ao maior</div>
+    <table class="w-full text-left">
+      <tbody class="divide-y divide-zinc-100">
+        <tr>
+          <td class="py-2 pr-4 mono text-[10px] text-zinc-500 w-32">text-[9px]</td>
+          <td class="py-2 pr-4 text-[11px] text-zinc-600">9px</td>
+          <td class="py-2 text-[9px]">meta info abaixo de favorito, "+ rótulo" idle</td>
+        </tr>
+        <tr>
+          <td class="py-2 pr-4 mono text-[10px] text-zinc-500">text-[10px]</td>
+          <td class="py-2 pr-4 text-[11px] text-zinc-600">10px</td>
+          <td class="py-2 text-[10px]">kicker labels uppercase, subtítulos mono, atalhos, contadores</td>
+        </tr>
+        <tr>
+          <td class="py-2 pr-4 mono text-[10px] text-zinc-500">text-xs</td>
+          <td class="py-2 pr-4 text-[11px] text-zinc-600">12px</td>
+          <td class="py-2 text-xs">itens de menu, body de painel, label de nó</td>
+        </tr>
+        <tr>
+          <td class="py-2 pr-4 mono text-[10px] text-zinc-500">text-sm</td>
+          <td class="py-2 pr-4 text-[11px] text-zinc-600">14px</td>
+          <td class="py-2 text-sm">btn-brand</td>
+        </tr>
+        <tr>
+          <td class="py-2 pr-4 mono text-[10px] text-zinc-500">18px inline</td>
+          <td class="py-2 pr-4 text-[11px] text-zinc-600">18px</td>
+          <td class="py-2" style="font-size:18px; font-weight:500;">corpo do TextNode (anotação livre)</td>
+        </tr>
+        <tr>
+          <td class="py-2 pr-4 mono text-[10px] text-zinc-500">text-3xl + font-display</td>
+          <td class="py-2 pr-4 text-[11px] text-zinc-600">30px</td>
+          <td class="py-2 display text-3xl text-zinc-300">uma tela em branco</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- wordmark -->
+  <div class="floating-panel p-6 flex items-center gap-6 flex-wrap">
+    <div class="brand-mark text-4xl">FUNILFLOW™</div>
+    <div class="text-xs text-zinc-500 leading-relaxed max-w-md">
+      <div class="font-medium text-zinc-700 mb-1">.brand-mark</div>
+      font-weight 800 · letter-spacing -0.02em · font-feature ss01 · sempre maiúsculo
+    </div>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── SPACING ─────────────────────── -->
+<section id="spacing" class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">4 · Spacing</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Escala Tailwind padrão. Múltiplos de 2px (4, 6, 8, 10, 12, 16). Snap canônico do canvas: 16px.</p>
+
+  <div class="floating-panel p-6">
+    <div class="space-y-3">
+      <div class="flex items-center gap-4"><div class="w-32 mono text-[11px] text-zinc-500">0.5 · 2px</div><div class="bg-zinc-900 h-3" style="width:2px"></div><div class="text-[11px] text-zinc-600">— (ultra-densidade interna)</div></div>
+      <div class="flex items-center gap-4"><div class="w-32 mono text-[11px] text-zinc-500">1 · 4px</div><div class="bg-zinc-900 h-3" style="width:4px"></div><div class="text-[11px] text-zinc-600">gap entre chips/items</div></div>
+      <div class="flex items-center gap-4"><div class="w-32 mono text-[11px] text-zinc-500">1.5 · 6px</div><div class="bg-zinc-900 h-3" style="width:6px"></div><div class="text-[11px] text-zinc-600">gap btn-brand · padding ⌫</div></div>
+      <div class="flex items-center gap-4"><div class="w-32 mono text-[11px] text-zinc-500">2 · 8px</div><div class="bg-zinc-900 h-3" style="width:8px"></div><div class="text-[11px] text-zinc-600">padding padrão de painel · gap sidebar</div></div>
+      <div class="flex items-center gap-4"><div class="w-32 mono text-[11px] text-zinc-500">2.5 · 10px</div><div class="bg-zinc-900 h-3" style="width:10px"></div><div class="text-[11px] text-zinc-600">gap item de menu · connect-mode hint</div></div>
+      <div class="flex items-center gap-4"><div class="w-32 mono text-[11px] text-zinc-500">3 · 12px</div><div class="bg-zinc-900 h-3" style="width:12px"></div><div class="text-[11px] text-zinc-600">px-3 padding x de header de menu</div></div>
+      <div class="flex items-center gap-4"><div class="w-32 mono text-[11px] text-zinc-500">4 · 16px</div><div class="bg-brand-400 h-3" style="background:#A6E517; width:16px"></div><div class="text-[11px] text-zinc-700 font-medium">SNAP GRID · grid de pontos · margem minimap · padding hero</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── RAIO ─────────────────────── -->
+<section id="raio" class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">5 · Border Radius</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Base <span class="mono">--radius: 0.5rem</span> (8px). Escala discreta. Cantos retos proibidos em painéis.</p>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+    <div class="floating-panel p-4 flex flex-col items-center">
+      <div class="w-16 h-16 bg-zinc-200" style="border-radius:4px"></div>
+      <div class="mt-3 text-xs font-medium">4px</div>
+      <div class="mono text-[10px] text-zinc-500">rounded-sm/edge label</div>
+    </div>
+    <div class="floating-panel p-4 flex flex-col items-center">
+      <div class="w-16 h-16 bg-zinc-200" style="border-radius:6px"></div>
+      <div class="mt-3 text-xs font-medium">6px</div>
+      <div class="mono text-[10px] text-zinc-500">rounded-md/chips</div>
+    </div>
+    <div class="floating-panel p-4 flex flex-col items-center">
+      <div class="w-16 h-16 bg-zinc-200" style="border-radius:8px"></div>
+      <div class="mt-3 text-xs font-medium">8px</div>
+      <div class="mono text-[10px] text-zinc-500">rounded-lg/minimap</div>
+    </div>
+    <div class="floating-panel p-4 flex flex-col items-center">
+      <div class="w-16 h-16 bg-zinc-200" style="border-radius:12px"></div>
+      <div class="mt-3 text-xs font-medium">12px</div>
+      <div class="mono text-[10px] text-zinc-500">rounded-xl · floating-panel</div>
+    </div>
+    <div class="floating-panel p-4 flex flex-col items-center">
+      <div class="w-16 h-16 bg-zinc-200" style="border-radius:14px"></div>
+      <div class="mt-3 text-xs font-medium">14px</div>
+      <div class="mono text-[10px] text-zinc-500">atomic traffic/remarketing</div>
+    </div>
+    <div class="floating-panel p-4 flex flex-col items-center">
+      <div class="w-16 h-16 bg-zinc-200" style="border-radius:999px"></div>
+      <div class="mt-3 text-xs font-medium">999px</div>
+      <div class="mono text-[10px] text-zinc-500">atomic nurture/audience</div>
+    </div>
+    <div class="floating-panel p-4 flex flex-col items-center">
+      <div class="w-16 h-16 bg-zinc-200" style="border-radius:14px; transform:rotate(45deg);"></div>
+      <div class="mt-3 text-xs font-medium">14px · rotate-45</div>
+      <div class="mono text-[10px] text-zinc-500">losango</div>
+    </div>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── SOMBRA ─────────────────────── -->
+<section id="sombra" class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">6 · Sombra</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Três sombras canônicas — frias, baixas. Nunca usar <span class="mono">shadow-lg/2xl</span> Tailwind.</p>
+
+  <div class="grid md:grid-cols-3 gap-6">
+    <div>
+      <div class="bg-white rounded-xl p-6 mb-3" style="box-shadow: 0 1px 2px rgba(15,15,15,0.04), 0 8px 24px -8px rgba(15,15,15,0.12);">
+        <div class="text-xs font-medium">shadow-float</div>
+        <div class="mono text-[10px] text-zinc-500 mt-1">floating-panel · mockup browser · minimap · ícone-chip</div>
+      </div>
+      <pre class="mono text-[10px] bg-zinc-900 text-zinc-100 p-3 rounded-md overflow-x-auto">0 1px 2px rgba(15,15,15,.04),
+0 8px 24px -8px rgba(15,15,15,.12)</pre>
+    </div>
+    <div>
+      <div class="bg-white rounded-xl p-6 mb-3" style="box-shadow: 0 2px 4px rgba(15,15,15,0.04), 0 16px 40px -12px rgba(15,15,15,0.18);">
+        <div class="text-xs font-medium">shadow-float-lg</div>
+        <div class="mono text-[10px] text-zinc-500 mt-1">reservado · modais/popovers grandes</div>
+      </div>
+      <pre class="mono text-[10px] bg-zinc-900 text-zinc-100 p-3 rounded-md overflow-x-auto">0 2px 4px rgba(15,15,15,.04),
+0 16px 40px -12px rgba(15,15,15,.18)</pre>
+    </div>
+    <div>
+      <div class="rounded p-6 mb-3" style="background:#FEF3A2; color:#422006; font-family:'Caveat',sans-serif; box-shadow: 0 1px 1px rgba(0,0,0,.06), 0 6px 12px -4px rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.04);">
+        <div class="text-base font-medium">shadow-sticky</div>
+        <div class="text-[11px] mt-1 opacity-70" style="font-family:'Geist Mono',monospace">só StickyNode · inset cria dobra inferior</div>
+      </div>
+      <pre class="mono text-[10px] bg-zinc-900 text-zinc-100 p-3 rounded-md overflow-x-auto">0 1px 1px rgba(0,0,0,.06),
+0 6px 12px -4px rgba(0,0,0,.08),
+inset 0 -2px 0 rgba(0,0,0,.04)</pre>
+    </div>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── MOTION ─────────────────────── -->
+<section id="motion" class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">7 · Motion</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Easing canônico <span class="mono">cubic-bezier(.16,1,.3,1)</span> (out-expo). 150–280ms em UI funcional. Loops 1–1.6s.</p>
+
+  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+    <button onclick="this.querySelector('.box').style.animation='none'; void this.offsetWidth; this.querySelector('.box').style.animation='fadeInUp 220ms cubic-bezier(.16,1,.3,1) both'" class="floating-panel p-4 text-left">
+      <div class="text-xs font-medium mb-2">fade-in-up</div>
+      <div class="box w-full h-16 bg-zinc-100 rounded flex items-center justify-center text-[11px] text-zinc-500" style="animation: fadeInUp 220ms cubic-bezier(.16,1,.3,1) both">click to replay</div>
+      <div class="mono text-[10px] text-zinc-400 mt-2">220ms · out-expo</div>
+    </button>
+    <button onclick="this.querySelector('.box').style.animation='none'; void this.offsetWidth; this.querySelector('.box').style.animation='scaleIn 180ms cubic-bezier(.16,1,.3,1) both'" class="floating-panel p-4 text-left">
+      <div class="text-xs font-medium mb-2">scale-in</div>
+      <div class="box w-full h-16 bg-zinc-100 rounded flex items-center justify-center text-[11px] text-zinc-500" style="animation: scaleIn 180ms cubic-bezier(.16,1,.3,1) both">click to replay</div>
+      <div class="mono text-[10px] text-zinc-400 mt-2">180ms · out-expo</div>
+    </button>
+    <div class="floating-panel p-4">
+      <div class="text-xs font-medium mb-2">dash · edge</div>
+      <svg viewBox="0 0 200 60" class="w-full h-16">
+        <path d="M 10 30 Q 100 -10 190 30" class="edge-path" />
+      </svg>
+      <div class="mono text-[10px] text-zinc-400 mt-2">1.6s · linear · infinite</div>
+    </div>
+    <div class="floating-panel p-4">
+      <div class="text-xs font-medium mb-2">pulse-brand</div>
+      <div class="w-full h-16 flex items-center justify-center">
+        <span class="w-3 h-3 rounded-full pulse-brand" style="background:#C5F432; box-shadow:0 0 0 2px white"></span>
+      </div>
+      <div class="mono text-[10px] text-zinc-400 mt-2">1.4s · ease-out · infinite</div>
+    </div>
+  </div>
+
+  <div class="floating-panel p-5 mt-6 text-xs leading-relaxed text-zinc-700">
+    <div class="font-medium mb-2">Duração por contexto</div>
+    <ul class="space-y-1 list-disc pl-5">
+      <li>Entrada de UI (painel, hint, sidebar, bottom-bar): <span class="mono">180–220ms</span></li>
+      <li>Zoom in/out programático: <span class="mono">200ms</span> · fitView: <span class="mono">280ms</span></li>
+      <li>Hover de botão / scale 1.05 do ícone: padrão <span class="mono">~150ms ease</span></li>
+      <li>Loops decorativos (dash, pulse): <span class="mono">1–1.6s</span></li>
+      <li>Connect-mode opacity transition: <span class="mono">160ms ease</span></li>
+      <li>Submenu open delay <span class="mono">120ms</span> · close delay <span class="mono">180ms</span></li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  @keyframes fadeInUp { 0%{opacity:0; transform:translateY(8px)} 100%{opacity:1; transform:translateY(0)} }
+  @keyframes scaleIn  { 0%{opacity:0; transform:scale(.92)} 100%{opacity:1; transform:scale(1)} }
+</style>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── COMPONENTES ─────────────────────── -->
+<section id="componentes" class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">8 · Componentes</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Classes utilitárias do projeto. Toda UI flutuante compõe a partir destas.</p>
+
+  <!-- floating-panel -->
+  <div class="mb-10">
+    <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">.floating-panel</h3>
+    <div class="canvas-paper relative rounded-xl border border-zinc-200 overflow-hidden">
+      <div class="grain"></div>
+      <div class="relative p-10 flex items-center justify-center gap-6 flex-wrap">
+        <div class="floating-panel px-4 py-3 text-xs">painel básico</div>
+        <div class="floating-panel py-2 w-44">
+          <div class="px-3 pb-2 border-b border-zinc-100">
+            <div class="text-[10px] uppercase tracking-wider text-zinc-400">CAPTAÇÃO</div>
+            <div class="text-[10px] text-zinc-400 mono mt-0.5">arraste pro canvas</div>
+          </div>
+          <div class="px-1.5 pt-1.5 grid grid-cols-2 gap-1">
+            <div class="flex flex-col items-center gap-1 p-2 rounded-md hover:bg-zinc-50">
+              <span class="flex items-center justify-center w-8 h-8 rounded-md text-white shadow-sm" style="background:#6366f1">
+                <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </span>
+              <span class="text-[10px] font-medium text-zinc-700">Pág. Captura</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 p-2 rounded-md hover:bg-zinc-50">
+              <span class="flex items-center justify-center w-8 h-8 rounded-md text-white shadow-sm" style="background:#8b5cf6">
+                <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>
+              </span>
+              <span class="text-[10px] font-medium text-zinc-700">Pop-up</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre class="mono text-[10px] bg-zinc-900 text-zinc-100 p-3 rounded-md mt-3 overflow-x-auto">@apply bg-white/95 backdrop-blur-md border border-zinc-200/80 shadow-float rounded-xl;</pre>
+  </div>
+
+  <!-- btn-brand -->
+  <div class="mb-10">
+    <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">.btn-brand</h3>
+    <div class="floating-panel p-6 flex items-center gap-4 flex-wrap">
+      <button class="btn-brand">idle</button>
+      <button class="btn-brand" style="background:#DDF878">hover · brand-200</button>
+      <button class="btn-brand" style="background:#A6E517">active · brand-400</button>
+      <button class="btn-brand" style="opacity:.4; cursor:not-allowed">disabled</button>
+    </div>
+    <pre class="mono text-[10px] bg-zinc-900 text-zinc-100 p-3 rounded-md mt-3 overflow-x-auto">@apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium
+       bg-brand-300 text-zinc-900 hover:bg-brand-200 active:bg-brand-400 transition;</pre>
+  </div>
+
+  <!-- edge-label -->
+  <div class="mb-10">
+    <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">.edge-label · React Flow</h3>
+    <div class="canvas-paper relative rounded-xl border border-zinc-200 overflow-hidden">
+      <div class="grain"></div>
+      <div class="relative p-10 flex items-center justify-center">
+        <svg viewBox="0 0 400 100" class="w-full max-w-md h-24">
+          <path d="M 20 50 Q 200 -10 380 50" class="edge-path" />
+        </svg>
+        <span class="edge-label absolute top-1/2 -translate-y-1/2">qualificado</span>
+      </div>
+    </div>
+    <pre class="mono text-[10px] bg-zinc-900 text-zinc-100 p-3 rounded-md mt-3 overflow-x-auto">@apply text-[10px] font-mono font-medium text-zinc-600 bg-white px-1.5 py-0.5 rounded border border-zinc-200 shadow-sm;</pre>
+  </div>
+
+  <!-- handles -->
+  <div class="mb-10">
+    <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">React Flow handles · floating edge</h3>
+    <div class="floating-panel p-5 text-xs text-zinc-700 leading-relaxed">
+      <p class="mb-2"><span class="mono">.react-flow__handle</span> tem <span class="mono">12×12 · opacity:0</span>. Existem para receber clique/conexão mas <strong>nunca aparecem</strong>.</p>
+      <p>Edge ancora no lado mais próximo via <span class="mono">getFloatingEdgeParams()</span> em <span class="mono">floatingEdge.ts</span>. Routing direcional inteligente.</p>
+    </div>
+    <pre class="mono text-[10px] bg-zinc-900 text-zinc-100 p-3 rounded-md mt-3 overflow-x-auto">.react-flow__handle {
+  width: 12px !important; height: 12px !important;
+  background: transparent !important; border: none !important;
+  opacity: 0 !important;
+}</pre>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── NÓS ─────────────────────── -->
+<section id="nos" class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">9 · Famílias de nó</h2>
+  <p class="text-zinc-500 mb-8 text-sm">atomic (140×110) · page (184×144) · sticky (180×140) · text (220×36). Cada uma com componente próprio.</p>
+
+  <!-- ATOMIC SHAPES BY CATEGORY -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">9.1 · Atomic · forma por categoria</h3>
+  <div class="canvas-paper relative rounded-xl border border-zinc-200 overflow-hidden mb-10">
+    <div class="grain"></div>
+    <div class="relative p-10 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-x-4 gap-y-10">
+      <!-- traffic / losango -->
+      <div class="flex flex-col items-center">
+        <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-traffic shadow-float" style="background:#1877F2">
+          <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="currentColor"><path d="M22 12.07C22 6.51 17.52 2 12 2S2 6.51 2 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.02H7.9v-2.91h2.54V9.84c0-2.51 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.77l-.44 2.91h-2.33V22c4.78-.75 8.44-4.91 8.44-9.93z"/></svg>
+        </div>
+        <div class="mt-3 text-[11px] font-medium">traffic / remarketing</div>
+        <div class="mono text-[10px] text-zinc-500">rounded-[14px] rotate-45</div>
+      </div>
+      <!-- nurture / círculo -->
+      <div class="flex flex-col items-center">
+        <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-nurture shadow-float" style="background:#22c55e">
+          <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
+        <div class="mt-3 text-[11px] font-medium">nurture</div>
+        <div class="mono text-[10px] text-zinc-500">rounded-full</div>
+      </div>
+      <!-- audience / pill -->
+      <div class="flex flex-col items-center">
+        <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-audience shadow-float" style="background:#F59E0B">
+          <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="mt-3 text-[11px] font-medium">audience</div>
+        <div class="mono text-[10px] text-zinc-500">rounded-[999px]</div>
+      </div>
+      <!-- automation / rounded-xl -->
+      <div class="flex flex-col items-center">
+        <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-automation shadow-float" style="background:#8B5CF6">
+          <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.25"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="mt-3 text-[11px] font-medium">automation</div>
+        <div class="mono text-[10px] text-zinc-500">rounded-xl</div>
+      </div>
+      <!-- conversion / rounded-md (utility default) -->
+      <div class="flex flex-col items-center">
+        <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-utility shadow-float" style="background:#ef4444">
+          <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.25"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        </div>
+        <div class="mt-3 text-[11px] font-medium">conversion · delivery · capture</div>
+        <div class="mono text-[10px] text-zinc-500">rounded-md (default)</div>
+      </div>
+      <!-- logic / losango pequeno -->
+      <div class="flex flex-col items-center">
+        <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-logic shadow-float" style="background:#94a3b8">
+          <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.25"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+        </div>
+        <div class="mt-3 text-[11px] font-medium">logic</div>
+        <div class="mono text-[10px] text-zinc-500">rounded-md rotate-45</div>
+      </div>
+      <!-- utility / quadrado -->
+      <div class="flex flex-col items-center">
+        <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-utility shadow-float" style="background:#71717A">
+          <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.25"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        </div>
+        <div class="mt-3 text-[11px] font-medium">utility</div>
+        <div class="mono text-[10px] text-zinc-500">rounded-md</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATOMIC ANATOMY -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">9.2 · Atomic · anatomia</h3>
+  <div class="canvas-paper relative rounded-xl border border-zinc-200 overflow-hidden mb-10">
+    <div class="grain"></div>
+    <div class="relative p-12 flex items-center justify-center gap-16 flex-wrap">
+      <!-- idle -->
+      <div class="flex flex-col items-center">
+        <div class="relative">
+          <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-traffic shadow-float" style="background:#1877F2">
+            <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="currentColor"><path d="M22 12.07C22 6.51 17.52 2 12 2S2 6.51 2 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.02H7.9v-2.91h2.54V9.84c0-2.51 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.77l-.44 2.91h-2.33V22c4.78-.75 8.44-4.91 8.44-9.93z"/></svg>
+          </div>
+        </div>
+        <div class="mt-2.5 text-xs font-medium text-zinc-900">Meta Ads</div>
+        <div class="mt-0.5 mono text-[9px] text-zinc-400">facebook.com/ads</div>
+      </div>
+      <!-- com overlay remarketing -->
+      <div class="flex flex-col items-center">
+        <div class="relative">
+          <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-traffic shadow-float" style="background:#4285F4">
+            <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/></svg>
+            <span class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white ring-2 ring-white shadow-sm flex items-center justify-center">
+              <svg viewBox="0 0 24 24" class="w-3 h-3 text-zinc-900" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            </span>
+          </div>
+        </div>
+        <div class="mt-2.5 text-xs font-medium text-zinc-900">Google Rmkt</div>
+        <div class="mt-0.5 mono text-[9px] text-zinc-400">overlay Repeat2</div>
+      </div>
+      <!-- com status active -->
+      <div class="flex flex-col items-center">
+        <div class="relative">
+          <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-nurture shadow-float" style="background:#22c55e">
+            <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full pulse-brand" style="background:#C5F432; box-shadow:0 0 0 2px white"></span>
+          </div>
+        </div>
+        <div class="mt-2.5 text-xs font-medium text-zinc-900">WhatsApp</div>
+        <div class="mt-0.5 mono text-[9px] text-zinc-400">status: active</div>
+      </div>
+      <!-- selecionado com resizer -->
+      <div class="flex flex-col items-center">
+        <div class="relative" style="padding:6px">
+          <!-- resizer outline + handles -->
+          <div class="absolute inset-0" style="border:1px solid #C5F432"></div>
+          <div class="absolute w-2.5 h-2.5 rounded-sm" style="background:#C5F432; border:2px solid white; top:-5px; left:-5px"></div>
+          <div class="absolute w-2.5 h-2.5 rounded-sm" style="background:#C5F432; border:2px solid white; top:-5px; right:-5px"></div>
+          <div class="absolute w-2.5 h-2.5 rounded-sm" style="background:#C5F432; border:2px solid white; bottom:-5px; left:-5px"></div>
+          <div class="absolute w-2.5 h-2.5 rounded-sm" style="background:#C5F432; border:2px solid white; bottom:-5px; right:-5px"></div>
+          <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-automation shadow-float" style="background:#8B5CF6">
+            <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.25"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+        </div>
+        <div class="mt-2.5 text-xs font-medium text-zinc-900">Automação</div>
+        <div class="mt-0.5 mono text-[9px] text-zinc-400">selected + NodeResizer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE NODE MOCKUPS -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">9.3 · Page · browser-window mockup</h3>
+  <div class="canvas-paper relative rounded-xl border border-zinc-200 overflow-hidden mb-10">
+    <div class="grain"></div>
+    <div class="relative p-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <!-- pageCapture -->
+      <div>
+        <div class="text-xs font-medium text-zinc-900 mb-2 text-center">Página de Captura</div>
+        <div class="bg-white rounded-lg border border-zinc-200 shadow-float overflow-hidden mx-auto" style="width:184px">
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 border-b border-zinc-100 bg-zinc-50/50">
+            <span class="w-2 h-2 rounded-full" style="background:#FF5F57"></span>
+            <span class="w-2 h-2 rounded-full" style="background:#FEBC2E"></span>
+            <span class="w-2 h-2 rounded-full" style="background:#28C840"></span>
+            <span class="ml-auto mono text-[8px] text-zinc-400">lead.site</span>
+          </div>
+          <div class="p-2.5 space-y-1.5" style="height:88px">
+            <div class="h-1 rounded-full bg-zinc-200" style="width:60%"></div>
+            <div class="space-y-1 pt-1">
+              <div class="h-3 rounded bg-zinc-100"></div>
+              <div class="h-3 rounded bg-zinc-100"></div>
+            </div>
+            <div class="pt-0.5">
+              <div class="h-4 rounded-sm flex items-center justify-center text-[7px] font-bold text-white tracking-wider" style="background:#6366f1">CADASTRAR</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- salePage -->
+      <div>
+        <div class="text-xs font-medium text-zinc-900 mb-2 text-center">Página de Vendas</div>
+        <div class="bg-white rounded-lg border border-zinc-200 shadow-float overflow-hidden mx-auto" style="width:184px">
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 border-b border-zinc-100 bg-zinc-50/50">
+            <span class="w-2 h-2 rounded-full" style="background:#FF5F57"></span>
+            <span class="w-2 h-2 rounded-full" style="background:#FEBC2E"></span>
+            <span class="w-2 h-2 rounded-full" style="background:#28C840"></span>
+            <span class="ml-auto mono text-[8px] text-zinc-400">venda.com</span>
+          </div>
+          <div class="p-2.5 space-y-1" style="height:88px">
+            <div class="h-1 rounded-full bg-zinc-200" style="width:40%"></div>
+            <div class="h-9 rounded bg-zinc-100 flex items-center justify-center">
+              <div class="w-4 h-4 rounded-full flex items-center justify-center" style="background:#ef4444">
+                <span class="text-white text-[8px]">▶</span>
+              </div>
+            </div>
+            <div class="h-4 rounded-sm flex items-center justify-center text-[7px] font-bold text-white tracking-wider" style="background:#ef4444">COMPRAR AGORA</div>
+          </div>
+        </div>
+      </div>
+      <!-- checkout -->
+      <div>
+        <div class="text-xs font-medium text-zinc-900 mb-2 text-center">Checkout</div>
+        <div class="bg-white rounded-lg border border-zinc-200 shadow-float overflow-hidden mx-auto" style="width:184px">
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 border-b border-zinc-100 bg-zinc-50/50">
+            <span class="w-2 h-2 rounded-full" style="background:#FF5F57"></span>
+            <span class="w-2 h-2 rounded-full" style="background:#FEBC2E"></span>
+            <span class="w-2 h-2 rounded-full" style="background:#28C840"></span>
+            <span class="ml-auto mono text-[8px] text-zinc-400">pay.app</span>
+          </div>
+          <div class="p-2.5 space-y-1" style="height:88px">
+            <div class="h-1 rounded-full bg-zinc-200" style="width:40%"></div>
+            <div class="flex items-center gap-1">
+              <div class="h-4 w-6 rounded bg-zinc-100"></div>
+              <div class="mono text-[7px] font-bold text-zinc-700">R$ 97</div>
+            </div>
+            <div class="flex gap-0.5">
+              <div class="w-3 h-2 rounded-sm bg-red-400"></div>
+              <div class="w-3 h-2 rounded-sm bg-blue-400"></div>
+              <div class="w-3 h-2 rounded-sm bg-orange-400"></div>
+              <div class="w-3 h-2 rounded-sm bg-zinc-300"></div>
+            </div>
+            <div class="h-4 rounded-sm flex items-center justify-center text-[7px] font-bold text-white tracking-wider" style="background:#dc2626">FINALIZAR</div>
+          </div>
+        </div>
+      </div>
+      <!-- thankyou -->
+      <div>
+        <div class="text-xs font-medium text-zinc-900 mb-2 text-center">Obrigado</div>
+        <div class="bg-white rounded-lg border border-zinc-200 shadow-float overflow-hidden mx-auto" style="width:184px">
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 border-b border-zinc-100 bg-zinc-50/50">
+            <span class="w-2 h-2 rounded-full" style="background:#FF5F57"></span>
+            <span class="w-2 h-2 rounded-full" style="background:#FEBC2E"></span>
+            <span class="w-2 h-2 rounded-full" style="background:#28C840"></span>
+            <span class="ml-auto mono text-[8px] text-zinc-400">obrigado</span>
+          </div>
+          <div class="p-2.5 flex flex-col items-center justify-center gap-1" style="height:88px">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center" style="background:#10b981">
+              <svg viewBox="0 0 24 24" class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="h-1 rounded-full bg-zinc-200" style="width:60%"></div>
+            <div class="h-1 rounded-full bg-zinc-200" style="width:40%; opacity:.5"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="relative px-10 pb-6 text-[11px] text-zinc-500 leading-relaxed">
+      <strong class="text-zinc-700">9 wireframes específicos</strong>: pageCapture, popup, salePage, checkout, upsell, downsell, orderBump, thankyou, members. Cada um tem mockup próprio. Default (qualquer outro kind) = 3 bars genéricos.
+    </div>
+  </div>
+
+  <!-- STICKY + TEXT -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">9.4 · Sticky + Text</h3>
+  <div class="canvas-paper relative rounded-xl border border-zinc-200 overflow-hidden mb-10">
+    <div class="grain"></div>
+    <div class="relative p-10 grid md:grid-cols-2 gap-10">
+      <!-- sticky default -->
+      <div>
+        <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-3">StickyNode · amarelo padrão</div>
+        <div class="p-3" style="width:180px; height:140px; background:#FEF3A2; color:#422006; font-family:'Caveat',sans-serif; box-shadow: 0 1px 1px rgba(0,0,0,.06), 0 6px 12px -4px rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.04);">
+          <div style="font-size:13px; font-weight:500; line-height:1.3;">Lembrar do split-test de copy aqui — gancho diferente pro Lead Quente</div>
+        </div>
+        <div class="mt-3 mono text-[10px] text-zinc-500">180×140 · Caveat · auto-contraste isLight() · shadow-sticky · handles ocultos</div>
+      </div>
+      <!-- sticky custom color (dark) -->
+      <div>
+        <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-3">StickyNode · cor custom → texto branco</div>
+        <div class="p-3" style="width:180px; height:140px; background:#0A0A0A; color:#ffffff; font-family:'Caveat',sans-serif; box-shadow: 0 1px 1px rgba(0,0,0,.06), 0 6px 12px -4px rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.04);">
+          <div style="font-size:13px; font-weight:500; line-height:1.3;">isLight(#0A0A0A) === false<br/>→ textColor automaticamente vira #ffffff</div>
+        </div>
+        <div class="mt-3 mono text-[10px] text-zinc-500">L = 0.299R + 0.587G + 0.114B · threshold &gt; 0.65</div>
+      </div>
+      <!-- text empty -->
+      <div>
+        <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-3">TextNode · vazio</div>
+        <div class="p-1" style="font-size:18px; font-weight:500;">
+          <span class="italic text-zinc-300">Texto vazio</span>
+        </div>
+        <div class="mt-3 mono text-[10px] text-zinc-500">italic zinc-300 · placeholder · não auto-deleta (race condition removida)</div>
+      </div>
+      <!-- text com conteúdo + ring -->
+      <div>
+        <div class="text-xs mono uppercase tracking-wider text-zinc-400 mb-3">TextNode · selecionado</div>
+        <div class="p-1 rounded" style="font-size:18px; font-weight:500; color:#0A0A0A; box-shadow: 0 0 0 1px #C5F432;">
+          Início do funil ↓
+        </div>
+        <div class="mt-3 mono text-[10px] text-zinc-500">18px font-medium · ring-1 ring-brand-300 quando selected · duplo-clique edita</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE FAMILIES -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">9.5 · Comparativo das 4 famílias</h3>
+  <div class="floating-panel p-4 overflow-x-auto">
+    <table class="w-full text-left text-xs">
+      <thead class="text-[10px] mono uppercase tracking-wider text-zinc-400">
+        <tr><th class="py-2 pr-4">família</th><th class="py-2 pr-4">tamanho natural</th><th class="py-2 pr-4">min resize</th><th class="py-2 pr-4">componente</th><th class="py-2">linguagem visual</th></tr>
+      </thead>
+      <tbody class="divide-y divide-zinc-100">
+        <tr><td class="py-2 pr-4 font-medium">atomic</td><td class="py-2 pr-4 mono">140 × 110</td><td class="py-2 pr-4 mono">80 × 60</td><td class="py-2 pr-4 mono">AtomicNode</td><td class="py-2">ícone-chip 68×68 + label · shape por categoria</td></tr>
+        <tr><td class="py-2 pr-4 font-medium">page</td><td class="py-2 pr-4 mono">184 × 144</td><td class="py-2 pr-4 mono">120 × 100</td><td class="py-2 pr-4 mono">PageNode</td><td class="py-2">browser-window mockup 184px + label acima</td></tr>
+        <tr><td class="py-2 pr-4 font-medium">sticky</td><td class="py-2 pr-4 mono">180 × 140</td><td class="py-2 pr-4 mono">120 × 80</td><td class="py-2 pr-4 mono">StickyNode</td><td class="py-2">papel amarelo · Caveat · shadow-sticky</td></tr>
+        <tr><td class="py-2 pr-4 font-medium">text</td><td class="py-2 pr-4 mono">220 × 36</td><td class="py-2 pr-4 mono">60 × 28</td><td class="py-2 pr-4 mono">TextNode</td><td class="py-2">texto livre 18px · sem container · ring brand quando selected</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── SIDEBAR ─────────────────────── -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">10 · Sidebar · esquerda flutuante</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Coluna de tabs + painel de categoria. Drag-and-drop para canvas.</p>
+
+  <div class="canvas-paper relative rounded-xl border border-zinc-200 overflow-hidden">
+    <div class="grain"></div>
+    <div class="relative p-12 flex items-center justify-center">
+      <div class="flex items-stretch">
+        <!-- tabs -->
+        <div class="floating-panel py-2 px-1 flex flex-col items-center gap-0.5">
+          <!-- favorites -->
+          <button class="relative w-10 h-10 rounded-lg flex items-center justify-center text-amber-500 hover:bg-amber-50">
+            <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </button>
+          <span class="w-6 h-px bg-zinc-200 my-1"></span>
+          <!-- categorias (idle) -->
+          <button class="w-10 h-10 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+          </button>
+          <!-- ativa -->
+          <button class="relative w-10 h-10 rounded-lg flex items-center justify-center bg-zinc-900 text-white">
+            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span class="absolute -right-2 top-1/2 -translate-y-1/2 w-1 h-5 rounded-full bg-zinc-900"></span>
+          </button>
+          <button class="w-10 h-10 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><polyline points="22 6 12 13 2 6"/></svg>
+          </button>
+          <button class="w-10 h-10 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          </button>
+          <span class="w-6 h-px bg-zinc-200 my-1"></span>
+          <button class="w-10 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-700">
+            <svg viewBox="0 0 24 24" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+        </div>
+
+        <!-- painel categoria -->
+        <div class="floating-panel ml-2 w-56 py-2">
+          <div class="px-3 pb-2 border-b border-zinc-100">
+            <div class="text-[10px] font-medium uppercase tracking-wider text-zinc-400">CAPTAÇÃO</div>
+            <div class="text-[10px] text-zinc-400 mono mt-0.5">arraste para o canvas</div>
+          </div>
+          <div class="px-1.5 pt-1.5 grid grid-cols-2 gap-1">
+            <div class="group flex flex-col items-center gap-1 p-2 rounded-md hover:bg-zinc-50 cursor-grab">
+              <span class="flex items-center justify-center w-8 h-8 rounded-md text-white shadow-sm group-hover:scale-105 transition" style="background:#6366f1">
+                <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </span>
+              <span class="text-[10px] font-medium text-zinc-700 text-center leading-tight">Pág. de Captura</span>
+            </div>
+            <div class="group flex flex-col items-center gap-1 p-2 rounded-md hover:bg-zinc-50 cursor-grab">
+              <span class="flex items-center justify-center w-8 h-8 rounded-md text-white shadow-sm group-hover:scale-105 transition" style="background:#8b5cf6">
+                <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.25"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+              </span>
+              <span class="text-[10px] font-medium text-zinc-700 text-center leading-tight">Pop-up</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="floating-panel p-4 mt-4 text-xs text-zinc-700 leading-relaxed">
+    <div class="mb-2"><strong>Tab states</strong>:
+      idle <span class="mono">text-zinc-500 hover:bg-zinc-100</span> ·
+      active <span class="mono">bg-zinc-900 text-white</span> + indicador pill direita ·
+      favoritos <span class="mono">text-amber-500 hover:bg-amber-50</span>
+    </div>
+    <div><strong>Chip de nó</strong>: <span class="mono">w-8 h-8 rounded-md</span> SEMPRE quadrado na sidebar — formas categóricas (losango/círculo) só aparecem no canvas vivo.</div>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── CONTEXT MENU ─────────────────────── -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">11 · Context Menu</h2>
+  <p class="text-zinc-500 mb-8 text-sm">4 variantes: node · edge · pane · multi. Largura fixa 240px. Clamp anti-overflow 8px viewport.</p>
+
+  <div class="canvas-paper relative rounded-xl border border-zinc-200 overflow-hidden">
+    <div class="grain"></div>
+    <div class="relative p-12 flex items-start justify-center">
+      <div class="floating-panel py-1.5" style="width:240px">
+        <!-- header -->
+        <div class="px-3 pt-2 pb-2 border-b border-zinc-100 flex items-center gap-2">
+          <span class="flex items-center justify-center w-6 h-6 rounded text-white" style="background:#1877F2">
+            <svg viewBox="0 0 24 24" class="w-3 h-3" fill="currentColor"><path d="M22 12c0-5.5-4.5-10-10-10S2 6.5 2 12c0 5 3.7 9.1 8.4 9.9V15H7.9v-3h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 3h-2.3v6.9C18.3 21.1 22 17 22 12z"/></svg>
+          </span>
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-medium text-zinc-900 truncate">Meta Ads</div>
+            <div class="text-[10px] mono text-zinc-400 truncate">Meta Ads</div>
+          </div>
+        </div>
+
+        <!-- item base -->
+        <div class="px-1 py-0.5">
+          <button class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-xs text-left text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900">
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 12 19 12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <span class="flex-1">Conectar 2 selecionados → este</span>
+          </button>
+        </div>
+        <div class="h-px bg-zinc-100 my-0.5"></div>
+        <div class="px-1 py-0.5">
+          <button class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-xs text-left text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900">
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span class="flex-1">Adicionar e conectar</span>
+            <svg viewBox="0 0 24 24" class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-xs text-left text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900">
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12V7a5 5 0 0 1 10 0M19 12v5a5 5 0 0 1-10 0"/></svg>
+            <span class="flex-1">Conectar com…</span>
+          </button>
+        </div>
+        <div class="h-px bg-zinc-100 my-0.5"></div>
+        <div class="px-1 py-0.5">
+          <button class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-xs text-left text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 bg-zinc-100">
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span class="flex-1">Renomear</span>
+          </button>
+          <button class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-xs text-left text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900">
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125 0-.926.746-1.688 1.688-1.688h1.996C18.328 16.375 21 13.703 21 10.328 21 5.742 16.969 2 12 2z"/></svg>
+            <span class="flex-1">Cor</span>
+            <svg viewBox="0 0 24 24" class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-xs text-left text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900">
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+            <span class="flex-1">Status</span>
+            <svg viewBox="0 0 24 24" class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div class="h-px bg-zinc-100 my-0.5"></div>
+        <div class="px-1 py-0.5">
+          <button class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-xs text-left text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900">
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span class="flex-1">Duplicar</span>
+            <span class="text-[10px] mono text-zinc-400 tabular-nums">⌘D</span>
+          </button>
+        </div>
+        <div class="h-px bg-zinc-100 my-0.5"></div>
+        <div class="px-1 py-0.5">
+          <button class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-xs text-left text-zinc-700 hover:bg-red-50 hover:text-red-600">
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+            <span class="flex-1">Deletar</span>
+            <span class="text-[10px] mono text-zinc-400 tabular-nums">⌫</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-3 mt-4">
+    <div class="floating-panel p-4 text-xs leading-relaxed text-zinc-700">
+      <div class="font-medium mb-2">Header</div>
+      <ul class="space-y-1 list-disc pl-5">
+        <li>Avatar 24×24 + ícone branco 12×12 com cor do tipo</li>
+        <li>Título <span class="mono">text-xs font-medium text-zinc-900 truncate</span></li>
+        <li>Subtítulo <span class="mono">text-[10px] mono text-zinc-400</span></li>
+      </ul>
+    </div>
+    <div class="floating-panel p-4 text-xs leading-relaxed text-zinc-700">
+      <div class="font-medium mb-2">Item states</div>
+      <ul class="space-y-1 list-disc pl-5">
+        <li>Idle: <span class="mono">text-zinc-700 hover:bg-zinc-100</span></li>
+        <li>Danger: <span class="mono">hover:bg-red-50 hover:text-red-600</span></li>
+        <li>Disabled: <span class="mono">text-zinc-300 cursor-default</span></li>
+        <li>Ícone <span class="mono">w-3.5 h-3.5 strokeWidth=2</span></li>
+        <li>Shortcut <span class="mono">text-[10px] mono text-zinc-400 tabular-nums</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── BOTTOM BAR ─────────────────────── -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">12 · Bottom Bar</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Ultra-densa, centralizada. Undo/redo · duplicar · zoom · export · save indicator.</p>
+
+  <div class="canvas-paper relative rounded-xl border border-zinc-200 overflow-hidden">
+    <div class="grain"></div>
+    <div class="relative p-16 flex justify-center">
+      <div class="floating-panel flex items-center gap-0.5 px-1.5 py-1">
+        <button class="inline-flex items-center justify-center w-7 h-7 rounded text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900" title="Desfazer ⌘Z">
+          <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
+        </button>
+        <button class="inline-flex items-center justify-center w-7 h-7 rounded text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 opacity-25" disabled title="Refazer ⌘⇧Z">
+          <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15-6.7L21 13"/></svg>
+        </button>
+        <span class="w-px h-4 bg-zinc-200 mx-0.5"></span>
+        <button class="inline-flex items-center justify-center w-7 h-7 rounded text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900" title="Duplicar ⌘D">
+          <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+        <span class="w-px h-4 bg-zinc-200 mx-0.5"></span>
+        <button class="inline-flex items-center justify-center w-7 h-7 rounded text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900" title="Diminuir zoom">
+          <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        </button>
+        <button class="px-2 h-7 mono text-[10px] font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded tabular-nums" title="Ajustar à tela">100%</button>
+        <button class="inline-flex items-center justify-center w-7 h-7 rounded text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900" title="Aumentar zoom">
+          <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        </button>
+        <button class="inline-flex items-center justify-center w-7 h-7 rounded text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900" title="Ajustar à tela">
+          <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        </button>
+        <span class="w-px h-4 bg-zinc-200 mx-0.5"></span>
+        <button class="inline-flex items-center justify-center w-7 h-7 rounded text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900" title="Exportar PNG">
+          <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
+        <span class="w-px h-4 bg-zinc-200 mx-0.5"></span>
+        <div class="px-2 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full" style="background:#84BD11"></span>
+          <span class="mono text-[10px] text-zinc-500">salvo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="floating-panel p-4 mt-4 text-xs text-zinc-700 leading-relaxed">
+    <strong>Anatomia</strong>: botão padrão <span class="mono">w-7 h-7 rounded</span> · ícone <span class="mono">w-3.5 h-3.5</span> · divider <span class="mono">w-px h-4 bg-zinc-200 mx-0.5</span> · gap <span class="mono">gap-0.5</span> ultra-denso · disabled mantém <span class="mono">opacity-25</span> nunca sumir.
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── INTERAÇÕES ─────────────────────── -->
+<section id="interacoes" class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">13 · Modos & Interações</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Hand tool (Space), connect mode (click-to-connect), empty state, snap grid.</p>
+
+  <!-- CONNECT MODE -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">13.1 · Connect mode</h3>
+  <div class="canvas-paper demo-cm relative rounded-xl border border-zinc-200 overflow-hidden mb-6">
+    <div class="grain"></div>
+    <!-- hint -->
+    <div class="floating-panel absolute top-4 left-1/2 -translate-x-1/2 z-30 px-3 py-2 flex items-center gap-2.5">
+      <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="#A6E517" stroke-width="2.25"><path d="M5 12V7a5 5 0 0 1 10 0M19 12v5a5 5 0 0 1-10 0"/></svg>
+      <span class="text-xs text-zinc-900 font-medium">Clique no nó de destino</span>
+      <span class="text-[10px] mono text-zinc-400 border-l border-zinc-200 pl-2">Esc cancela</span>
+      <button class="ml-1 text-zinc-400 hover:text-zinc-900">
+        <svg viewBox="0 0 24 24" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="relative p-20 grid grid-cols-3 gap-10 place-items-center">
+      <!-- nó fonte (selected, pulsa) -->
+      <div class="relative" style="cursor:crosshair">
+        <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-traffic shadow-float pulse-brand" style="background:#1877F2">
+          <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="currentColor"><path d="M22 12.07C22 6.51 17.52 2 12 2S2 6.51 2 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.02H7.9v-2.91h2.54V9.84c0-2.51 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.77l-.44 2.91h-2.33V22c4.78-.75 8.44-4.91 8.44-9.93z"/></svg>
+        </div>
+      </div>
+      <!-- nó dimmed -->
+      <div class="node-dimmed relative" style="cursor:crosshair">
+        <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-nurture shadow-float" style="background:#0ea5e9">
+          <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>
+        </div>
+      </div>
+      <!-- nó dimmed -->
+      <div class="node-dimmed relative" style="cursor:crosshair">
+        <div class="relative w-[68px] h-[68px] flex items-center justify-center shape-utility shadow-float" style="background:#dc2626">
+          <svg viewBox="0 0 24 24" class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.25"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="floating-panel p-4 mb-10 text-xs text-zinc-700 leading-relaxed">
+    Wrapper recebe classe-flag <span class="mono">.connect-mode</span>. Nós não-selecionados ficam <span class="mono">opacity: 0.55</span>. Hover restaura + drop-shadow brand-300. Source pulsa com <span class="mono">pulse-brand</span>. Cursor: <span class="mono">crosshair</span>.
+  </div>
+
+  <!-- EMPTY STATE -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">13.2 · Empty state</h3>
+  <div class="canvas-paper relative rounded-xl border border-zinc-200 overflow-hidden mb-6" style="min-height:240px">
+    <div class="grain"></div>
+    <div class="absolute inset-0 flex items-center justify-center">
+      <div class="text-center max-w-md">
+        <div class="display text-3xl text-zinc-300 mb-1">uma tela em branco</div>
+        <p class="text-xs text-zinc-400 mono">arraste um elemento da lateral pra começar</p>
+      </div>
+    </div>
+  </div>
+  <div class="floating-panel p-4 mb-10 text-xs text-zinc-700 leading-relaxed">
+    Único uso de <span class="mono">.font-display</span> (Instrument Serif italic) no editor. Tom poético, não imperativo. Sub em <span class="mono">font-mono text-zinc-400</span>.
+  </div>
+
+  <!-- SNAP GRID -->
+  <h3 class="text-sm mono uppercase tracking-wider text-zinc-500 mb-3">13.3 · Snap grid 16px</h3>
+  <div class="floating-panel p-5 text-xs text-zinc-700 leading-relaxed">
+    <pre class="mono text-[11px] bg-zinc-900 text-zinc-100 p-3 rounded-md overflow-x-auto"><span class="text-zinc-400">// CanvasEditor.tsx</span>
+&lt;ReactFlow
+  snapToGrid
+  <span style="color:#C5F432">snapGrid={[16, 16]}</span>
+  minZoom={0.2}
+  maxZoom={2.5}
+  panOnDrag={spaceHeld ? [0, 1, 2] : [1, 2]}
+  selectionOnDrag={!spaceHeld && !connectModeSourceId}
+  connectionMode={ConnectionMode.Loose}
+  fitViewOptions={{ padding: 0.2 }}
+/&gt;</pre>
+    <ul class="mt-3 space-y-1 list-disc pl-5">
+      <li>Hand tool: <span class="mono">Space</span> segurado → pan com qualquer botão · classe-flag <span class="mono">.space-held</span> aplica <span class="mono">cursor: grab/grabbing</span>.</li>
+      <li>Selection box: drag no canvas vazio quando NÃO está em Space nem connect-mode.</li>
+      <li>Duplo-clique no pane vazio → cria TextNode editável.</li>
+      <li>Backspace/Delete deleta seleção.</li>
+      <li>Multi-select: <span class="mono">Meta</span> ou <span class="mono">Shift</span>.</li>
+    </ul>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── TOKENS SEMÂNTICOS ─────────────────────── -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">14 · Tokens semânticos · CSS variables</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Modo claro. <span class="mono">darkMode: ["class"]</span> pronto mas não-implementado.</p>
+
+  <div class="floating-panel p-0 overflow-hidden">
+    <pre class="mono text-[12px] p-5 leading-relaxed overflow-x-auto"><span style="color:#52525b">:root {</span>
+  <span style="color:#52525b">--background:</span>             0 0% 100%;       <span style="color:#a1a1aa">/* branco puro */</span>
+  <span style="color:#52525b">--foreground:</span>             0 0% 4%;         <span style="color:#a1a1aa">/* near-black */</span>
+  <span style="color:#52525b">--card:</span>                   0 0% 100%;
+  <span style="color:#52525b">--card-foreground:</span>        0 0% 4%;
+  <span style="color:#52525b">--popover:</span>                0 0% 100%;
+  <span style="color:#52525b">--popover-foreground:</span>     0 0% 4%;
+  <span style="color:#52525b">--primary:</span>                0 0% 9%;         <span style="color:#a1a1aa">/* near-black UI neutro */</span>
+  <span style="color:#52525b">--primary-foreground:</span>     0 0% 98%;
+  <span style="color:#52525b">--secondary:</span>              0 0% 96%;
+  <span style="color:#52525b">--secondary-foreground:</span>   0 0% 9%;
+  <span style="color:#52525b">--muted:</span>                  0 0% 96%;
+  <span style="color:#52525b">--muted-foreground:</span>       240 4% 46%;
+  <span style="color:#52525b">--accent:</span>                 <span style="color:#84BD11">75 91% 58%</span>;     <span style="color:#a1a1aa">/* brand lime · único accent */</span>
+  <span style="color:#52525b">--accent-foreground:</span>      0 0% 9%;
+  <span style="color:#52525b">--destructive:</span>            0 84% 60%;       <span style="color:#a1a1aa">/* red-500 */</span>
+  <span style="color:#52525b">--destructive-foreground:</span> 0 0% 98%;
+  <span style="color:#52525b">--border:</span>                 240 6% 90%;
+  <span style="color:#52525b">--input:</span>                  240 6% 90%;
+  <span style="color:#52525b">--ring:</span>                   <span style="color:#84BD11">75 91% 58%</span>;     <span style="color:#a1a1aa">/* foco usa brand */</span>
+  <span style="color:#52525b">--radius:</span>                 0.5rem;
+<span style="color:#52525b">}</span></pre>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── ANTI-PADRÕES ─────────────────────── -->
+<section id="antipadroes" class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">15 · Anti-padrões</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Decisões que parecem boas e quebram a linguagem. Não fazer.</p>
+
+  <div class="grid md:grid-cols-2 gap-3">
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">Sombras pesadas</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Não usar <span class="mono">shadow-lg/xl/2xl</span> do Tailwind. Quebra estética fria do canvas-on-paper. Apenas as 3 canônicas: float · float-lg · sticky.</p>
+    </div>
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">Acento secundário</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Não criar rosa/ciano/roxo "extra" pra destacar. Só brand-300. Hierarquia visual vem de tipografia + peso + zinc, não de cores extras.</p>
+    </div>
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">Raio arbitrário</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Nada de <span class="mono">rounded-[7px]</span>, <span class="mono">rounded-[20px]</span>. Escala discreta: 4 · 6 · 8 · 12 · 14 · 999. Cantos retos proibidos em painéis flutuantes.</p>
+    </div>
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">Painel opaco</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Nunca <span class="mono">bg-white</span> 100%. Sempre <span class="mono">white/95 + backdrop-blur</span>. Transparência é parte da linguagem.</p>
+    </div>
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">Ícone fino</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Lucide <span class="mono">strokeWidth=1</span> ou <span class="mono">1.5</span> some no canvas bege. 2 em UI, 2.25 dentro de chip colorido, 2.5 pra "carimbar" (check, overlay).</p>
+    </div>
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">Texto branco em brand</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Texto sobre <span class="mono">#C5F432</span> deve ser <span class="mono">zinc-900</span>. Branco falha contraste. <strong>Nunca</strong> branco.</p>
+    </div>
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">Animação longa em UI</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">&gt; 300ms em entrada de menu/painel é lento. Reservado pra loops decorativos (pulse, dash).</p>
+    </div>
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">transform: scale() no resize</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Removido. Tentativas via <span class="mono">useInternalNode</span>/ResizeObserver instáveis. Resize só altera bounding box; conteúdo centraliza.</p>
+    </div>
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">Auto-delete de TextNode vazio</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Removido por race condition (closure stale durante onChange rápido deletava nós com texto recém-digitado). Vazio fica como placeholder italic.</p>
+    </div>
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">Cor hardcoded fora do registro</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Tipo → <span class="mono">NODE_TYPES[kind].color</span>. Neutro → escala zinc. Nunca hex solto inline.</p>
+    </div>
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">Wireframe genérico em Page</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Cada kind de página tem mockup próprio em <span class="mono">PageWireframe</span>. Não cair pra retângulos genéricos por preguiça.</p>
+    </div>
+    <div class="floating-panel p-4 border-l-4" style="border-left-color:#EF4444">
+      <div class="text-xs font-medium mb-1 text-zinc-900">font-display fora de hero</div>
+      <p class="text-xs text-zinc-600 leading-relaxed">Instrument Serif italic é raro de propósito. Só empty state / floreio. Nunca em body, botão, label.</p>
+    </div>
+  </div>
+</section>
+
+<div class="h-rule max-w-7xl mx-auto"></div>
+
+<!-- ─────────────────────── CHEAT SHEET ─────────────────────── -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+  <h2 class="text-3xl font-semibold tracking-tight mb-2">16 · Cheat sheet</h2>
+  <p class="text-zinc-500 mb-8 text-sm">Tudo o que precisa lembrar em uma tela.</p>
+
+  <div class="floating-panel p-0 overflow-hidden">
+    <pre class="mono text-[11px] p-6 leading-relaxed overflow-x-auto">COR DE MARCA       <span style="color:#84BD11">#C5F432</span> (brand-300) — única.
+CANVAS             #FAFAF7 + dots rgba(0,0,0,0.08) 16×16 + grain 0.025 multiply.
+PANEL              white/95 + blur(md) + border zinc-200/80 + shadow-float + rounded-xl.
+TIPOGRAFIA         Geist (UI) + Geist Mono (meta/URLs) + Instrument Serif italic (.font-display, hero).
+SOMBRAS            float | float-lg | sticky — só essas.
+RAIO               4 / 6 / 8 / 12 / 14 / 999 — só esses.
+SNAP               16px — em tudo (grid, posição, dots).
+MOTION             180–280ms, ease-out (cubic-bezier(.16,1,.3,1)). Loops: 1–1.6s.
+NEUTROS            escala zinc inteira.
+STATUS             planned(zinc-400) | production(amber-500) | active(brand+pulse) | paused(red-500).
+FAMÍLIAS DE NÓ     atomic(140×110) | page(184×144) | sticky(180×140) | text(220×36).
+HANDLES            12×12 invisíveis, conexão floating (lado mais próximo).
+EDGE               stroke #a1a1aa, dasharray 6 4, dash 1.6s. Selecionada → #84bd11.
+EASING             cubic-bezier(0.16, 1, 0.3, 1) — out-expo.
+SELECTION          ::selection { background:#c5f432; color:#0a0a0a }
+SCROLLBAR          10px, thumb rgba(0,0,0,.12), hover .24, rounded-full.</pre>
+  </div>
+</section>
+
+<!-- ─────────────────────── FOOTER ─────────────────────── -->
+<footer class="border-t border-zinc-200/70 mt-16">
+  <div class="max-w-7xl mx-auto px-6 py-10 flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center justify-center w-6 h-6 rounded-md" style="background:#C5F432">
+        <svg viewBox="0 0 24 24" class="w-3 h-3 text-zinc-900" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
+      <span class="brand-mark text-sm">FUNILFLOW</span>
+      <span class="mono text-[10px] text-zinc-400 ml-1">stylespec · single source of truth</span>
+    </div>
+    <div class="mono text-[10px] text-zinc-400">
+      espelha código · <span class="display">divergiu? código vence</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

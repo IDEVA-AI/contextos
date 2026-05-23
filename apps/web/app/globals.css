@@ -1,26 +1,190 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================
+   ContextOS — Design System
+   Baseado em docs/style-spec.html (Funil365 v1).
+   Princípios: floating-first, uma cor de marca (#C5F432),
+   canvas-on-paper, snap 16px, motion contido.
+   ============================================ */
+
+@theme {
+  /* --- Cores: brand (lime) --- */
+  --color-brand-50: #f7fedb;
+  --color-brand-100: #eefcb6;
+  --color-brand-200: #ddf878;
+  --color-brand-300: #c5f432;
+  --color-brand-400: #a6e517;
+  --color-brand-500: #84bd11;
+  --color-brand-600: #65900e;
+  --color-brand-700: #48680a;
+  --color-brand: #c5f432;
+
+  /* --- Status do nó --- */
+  --color-status-planned: #a1a1aa;
+  --color-status-production: #f59e0b;
+  --color-status-active: #84bd11;
+  --color-status-paused: #ef4444;
+
+  /* --- Surface --- */
+  --color-canvas: #fafaf7;
+  --color-foreground: #0a0a0a;
+
+  /* --- Sombras canônicas (frias, baixas) --- */
+  --shadow-float:
+    0 1px 2px rgba(15, 15, 15, 0.04),
+    0 8px 24px -8px rgba(15, 15, 15, 0.12);
+  --shadow-float-lg:
+    0 2px 4px rgba(15, 15, 15, 0.04),
+    0 16px 40px -12px rgba(15, 15, 15, 0.18);
+  --shadow-sticky:
+    0 1px 1px rgba(0, 0, 0, 0.06),
+    0 6px 12px -4px rgba(0, 0, 0, 0.08),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.04);
+
+  /* --- Tipografia --- */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-display), ui-serif, Georgia, serif;
+  --font-caveat: var(--font-caveat), cursive;
+
+  /* --- Snap canônico do canvas: 16px --- */
+  --spacing-snap: 16px;
+
+  /* --- Easing/duration canônicos --- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Animations --- */
+  --animate-fade-in-up: fade-in-up 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-scale-in: scale-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-pulse-brand: pulse-brand 1.4s ease-out infinite;
+  --animate-dash: dash 1.6s linear infinite;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-brand {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(197, 244, 50, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(197, 244, 50, 0);
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+/* --- Base --- */
+
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #fafaf7;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: 'ss01', 'cv11', 'cv02';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  color: #0a0a0a;
+}
+
+::selection {
+  background: #c5f432;
+  color: #0a0a0a;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.24);
+  background-clip: padding-box;
+}
+
+/* --- Utilities canônicas --- */
+
+@utility canvas-paper {
+  background-color: #fafaf7;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-position: -1px -1px;
+}
+
+@utility grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+@utility floating-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(228, 228, 231, 0.8);
+  box-shadow: var(--shadow-float);
+  border-radius: 12px;
+}
+
+@utility btn-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: #c5f432;
+  color: #0a0a0a;
+  transition: background 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+
+@utility brand-mark {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+@utility mono {
+  font-family: var(--font-mono);
 }

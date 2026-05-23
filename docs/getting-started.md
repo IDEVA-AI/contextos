@@ -26,8 +26,10 @@ pnpm infra:up
 ```
 
 Isso sobe:
-- `contextos_postgres` em `localhost:5432` (user/pwd/db: `contextos`/`contextos_dev`/`contextos`)
-- `contextos_redis` em `localhost:6379`
+- `contextos_postgres` em `localhost:5436` (user/pwd/db: `contextos`/`contextos_dev`/`contextos`)
+- `contextos_redis` em `localhost:6381`
+
+> Portas fora do padrão (5432/6379) pra evitar conflito com outros projetos rodando Postgres/Redis local.
 
 Verifica:
 ```bash

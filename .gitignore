@@ -47,5 +47,3 @@ coverage/
 .cache
 .eslintcache
 
-# Pendente classificar (perguntar dono antes de commitar)
-stylespec.html

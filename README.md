@@ -99,6 +99,8 @@ pnpm dev
 
 Acesse: http://localhost:3000
 
+> **Portas locais:** Postgres em `5436`, Redis em `6381` (fora do padrão pra evitar conflito com outros projetos rodando Postgres/Redis no mesmo host).
+
 ---
 
 ## Estrutura
