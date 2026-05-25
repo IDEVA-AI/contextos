@@ -18,6 +18,7 @@ export default function HelpPage() {
       <Compile />
       <Versions />
       <Plug />
+      <HowAIUses />
       <Prompts />
       <Cheatsheet />
       <Footer />
@@ -55,6 +56,7 @@ function Hero() {
         <TocChip href="#compile" label="Compilar" />
         <TocChip href="#versions" label="Versões" />
         <TocChip href="#plug" label="Plugar Claude Desktop" />
+        <TocChip href="#how-ai-uses" label="Como a IA usa" />
         <TocChip href="#prompts" label="Prompts prontos" />
       </div>
     </section>
@@ -708,6 +710,412 @@ function Plug() {
 }
 
 // ============================================================
+// COMO A IA USA O CEREBRO
+// ============================================================
+
+function HowAIUses() {
+  return (
+    <section id="how-ai-uses" className="scroll-mt-8">
+      <SectionLabel num="11" title="Como a IA usa o cérebro · anatomia + pipeline" />
+      <p className="text-sm text-zinc-600 mb-5 max-w-2xl leading-relaxed">
+        Entender o que rola entre <em>"você pergunta no Claude Desktop"</em> e{' '}
+        <em>"resposta volta usando seu contexto"</em> é o que separa modelar bem de modelar no
+        chute. Esse é o passo-a-passo completo, com diagrama, pipeline e verdade nua sobre
+        edges.
+      </p>
+
+      {/* 11.1 Fluxo end-to-end */}
+      <h3 className="font-semibold text-base mt-6 mb-2">11.1 · Fluxo end-to-end (você → resposta)</h3>
+      <p className="text-xs text-zinc-600 mb-3 max-w-2xl leading-relaxed">
+        Quando você pergunta algo no Claude Desktop com o MCP do ContextOS plugado:
+      </p>
+      <CodeSnippet>{String.raw`┌─────────────────────────────────────────────────────────────────┐
+│  VOCÊ no chat do Claude Desktop                                 │
+│  "Responda esse lead pedindo proposta comercial"                │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │
+                       ▼  Claude (modelo Anthropic) decide chamar tool
+┌─────────────────────────────────────────────────────────────────┐
+│  tool: compile_context                                          │
+│  args: { brain_id, query, format: "markdown", budget: 4000 }    │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │  HTTPS streamable-http
+                       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  ContextOS /mcp                                                 │
+│  ├─ Autentica Bearer (Authorization: ctx_sk_live_...)           │
+│  ├─ Resolve scopes da API key (RBAC)                            │
+│  └─ Roda Context Compiler (pipeline 8 passos abaixo)            │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │
+                       ▼  Pacote pronto (markdown ou messages)
+┌─────────────────────────────────────────────────────────────────┐
+│  # Persona                                                      │
+│  Você é SDR da IDEVA-AI...                                      │
+│                                                                 │
+│  # Formato de output                                            │
+│  Sempre 2 parágrafos curtos...                                  │
+│                                                                 │
+│  # Regras                                                       │
+│  - Nunca prometer garantia                                      │
+│  - Pedir BANT antes de preço                                    │
+│  - Formato decisor primeiro, técnico depois                     │
+│                                                                 │
+│  # Fatos                                                        │
+│  - Programa Dominação Local: setup R$ 3-8k + R$ 1-3k/mês        │
+│  - ICP: PME 5-50 funcionários                                   │
+│  - Cases: Carol Queiroz, Valloure, Rayssa Hass                  │
+│                                                                 │
+│  # Tarefa                                                       │
+│  Responda esse lead pedindo proposta comercial                  │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │
+                       ▼  Claude Desktop incorpora no contexto
+┌─────────────────────────────────────────────────────────────────┐
+│  Resposta sai no tom IDEVA, pede BANT, não joga preço,          │
+│  cita case relevante quando faz sentido.                        │
+└─────────────────────────────────────────────────────────────────┘`}</CodeSnippet>
+      <p className="text-xs text-zinc-600 mt-3 leading-relaxed max-w-2xl">
+        Você nunca cola persona/regras manualmente. <strong>Trocou de modelo (Claude → GPT →
+        Gemini)? Cérebro continua, basta o novo cliente plugado.</strong> Esse é o moat real.
+      </p>
+
+      {/* 11.2 Pipeline 8 passos */}
+      <h3 className="font-semibold text-base mt-8 mb-2">
+        11.2 · Pipeline do Compiler · 8 passos
+      </h3>
+      <p className="text-xs text-zinc-600 mb-3 max-w-2xl leading-relaxed">
+        Cada chamada a <code>compile_context</code> roda esse pipeline determinístico (zero LLM,
+        zero alucinação). Mesmo input → mesmo output. Cache SHA-256 5min em Redis.
+      </p>
+      <CodeSnippet>{String.raw`┌──────────────────────────────────────────────────────────────┐
+│  INPUT                                                       │
+│  workspace_id, brain_id, query, task, format, budget, scope  │
+└──────────────────────────┬───────────────────────────────────┘
+                           ▼
+[ 1 ] RESOLVE SCOPE
+      → Brain + workspace + projeto.
+      → Pega snapshot atual (currentVersionId).
+
+[ 2 ] LOAD CANDIDATES
+      → Todos os nodes enabled do brain.
+      → Memórias do workspace + projetos.
+      → Chunks indexados de documentos (knowledge).
+
+[ 3 ] FILTER RBAC
+      → API key? Descarta blocos cuja tag não bate scopes.
+      → Cookie (UI)? Passa tudo do dono.
+      → Default-deny. Wildcards: client:* casa client:delta.
+
+[ 4 ] RANK RELEVANCE
+      → Para cada candidato:
+          relevance = cosine(query_emb, block_emb)
+          (fallback: substring/word match se offline)
+      → finalScore = 0.6*relevance + 0.3*priority/100 + 0.1*recency
+      → recency decai em 90 dias.
+
+[ 5 ] DETECT CONFLICTS
+      → Heurístico: 2+ blocos do mesmo tipo single
+        com priority próxima (range 5)?
+      → Adiciona warning no pacote. Não bloqueia.
+
+[ 6 ] ORDER + RESOLVE SINGLE
+      → Sort priority desc, scope specificity desc.
+      → Type single: remove duplicados, fica só o vencedor.
+
+[ 7 ] COMPRESS TO BUDGET
+      → Re-sort por finalScore.
+      → Inclui até estourar budget_tokens.
+      → Hard cut do menos relevante. (LLM summarize = fase 2)
+
+[ 8 ] BUILD PACKAGE
+      → Bucketize por tipo:
+          single → persona, tone, output_format
+          multi  → instructions, rules, facts, memories, examples
+      → Monta no formato pedido (json/messages/markdown/mcp).
+      → Persiste trace (audit log).
+                           ▼
+┌──────────────────────────────────────────────────────────────┐
+│  OUTPUT                                                      │
+│  Package + stats + trace_id + warnings                       │
+└──────────────────────────────────────────────────────────────┘`}</CodeSnippet>
+      <p className="text-xs text-zinc-600 mt-3 leading-relaxed max-w-2xl">
+        Pra ver isso ao vivo: usa o botão <strong>Compilar</strong> no canvas. Mostra o pacote
+        bruto + stats (tokens, blocos incluídos/excluídos, warnings, trace_id).
+      </p>
+
+      {/* 11.3 Verdade sobre edges */}
+      <h3 className="font-semibold text-base mt-8 mb-2">
+        11.3 · Verdade sobre edges (conectar blocos)
+      </h3>
+      <div className="floating-panel p-4 bg-amber-50/40 border-amber-200">
+        <div className="mono text-[10px] uppercase tracking-wider text-amber-700 mb-1">
+          Importante — expectativa vs realidade
+        </div>
+        <p className="text-xs text-zinc-700 leading-relaxed">
+          <strong>Edges no canvas hoje são organizacionais, não semânticos.</strong> Você pode
+          conectar Persona → Regra → Memória, mas o Compiler <em>não usa</em> essas conexões.
+          Ele pega <strong>todos</strong> os nodes do brain, filtra por RBAC, ranqueia, e monta
+          o pacote.
+        </p>
+      </div>
+      <div className="grid md:grid-cols-2 gap-3 mt-3">
+        <RankCard
+          label="Edges servem PRA"
+          desc="Hoje:"
+        >
+          <ul className="text-xs text-zinc-700 space-y-1 leading-relaxed">
+            <li>• Agrupamento visual ("essas memórias são do tema X")</li>
+            <li>• Documentação mental ("Regra Y deriva da Persona Z")</li>
+            <li>• Mapeamento de dependência informacional</li>
+            <li>• Versionamento + restore preserva o desenho</li>
+          </ul>
+        </RankCard>
+        <RankCard
+          label="Edges NÃO fazem"
+          desc="Hoje:"
+        >
+          <ul className="text-xs text-zinc-700 space-y-1 leading-relaxed">
+            <li>• Encadear execução tipo fluxo</li>
+            <li>• Mudar prioridade de blocos conectados</li>
+            <li>• Compor sub-pacotes por sub-grafo</li>
+            <li>• Ativar/desativar em cascata</li>
+          </ul>
+        </RankCard>
+      </div>
+      <p className="text-xs text-zinc-500 mt-3 leading-relaxed max-w-2xl italic">
+        Fase 2: edges podem virar dependências semânticas (cascata enable/disable, agrupamento
+        em sub-pacotes, scoring por proximidade no grafo). Por ora: <strong>você não precisa
+        conectar nada pra cérebro funcionar.</strong>
+      </p>
+
+      {/* 11.4 Bloco → seção do pacote */}
+      <h3 className="font-semibold text-base mt-8 mb-2">
+        11.4 · Cada tipo de bloco vira qual seção do pacote?
+      </h3>
+      <p className="text-xs text-zinc-600 mb-3 max-w-2xl leading-relaxed">
+        Quando o Compiler monta o markdown final, ele agrupa por tipo. Saber isso ajuda a
+        decidir <em>qual tipo</em> usar pra qual conteúdo.
+      </p>
+      <div className="floating-panel p-0 overflow-hidden">
+        <table className="w-full text-xs">
+          <thead className="bg-zinc-50 border-b border-zinc-100">
+            <tr className="text-left">
+              <th className="px-3 py-2 font-medium">Tipo de bloco</th>
+              <th className="px-3 py-2 font-medium">Vira seção</th>
+              <th className="px-3 py-2 font-medium">Mode</th>
+              <th className="px-3 py-2 font-medium">Função no contexto</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-100">
+            <tr>
+              <td className="px-3 py-2 font-medium">Persona</td>
+              <td className="px-3 py-2">
+                <code>#&nbsp;Persona</code>
+              </td>
+              <td className="px-3 py-2 mono text-zinc-500">single</td>
+              <td className="px-3 py-2 text-zinc-700">Quem fala. Identidade.</td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2 font-medium">Output Template</td>
+              <td className="px-3 py-2">
+                <code>#&nbsp;Formato de output</code>
+              </td>
+              <td className="px-3 py-2 mono text-zinc-500">single</td>
+              <td className="px-3 py-2 text-zinc-700">Forma da resposta.</td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2 font-medium">Regra (Rule)</td>
+              <td className="px-3 py-2">
+                <code>#&nbsp;Regras</code>
+              </td>
+              <td className="px-3 py-2 mono text-zinc-500">multi</td>
+              <td className="px-3 py-2 text-zinc-700">Constraints. Obrigatório/proibido.</td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2 font-medium">Contexto (Context Block)</td>
+              <td className="px-3 py-2">
+                <code>#&nbsp;Fatos</code>
+              </td>
+              <td className="px-3 py-2 mono text-zinc-500">multi</td>
+              <td className="px-3 py-2 text-zinc-700">Info estática, dado, descrição.</td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2 font-medium">Memória</td>
+              <td className="px-3 py-2">
+                <code>#&nbsp;Memórias</code>
+              </td>
+              <td className="px-3 py-2 mono text-zinc-500">multi</td>
+              <td className="px-3 py-2 text-zinc-700">
+                Aprendizado, preferência, padrão observado.
+              </td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2 font-medium">Documento</td>
+              <td className="px-3 py-2">
+                <code>#&nbsp;Fatos</code>{' '}
+                <span className="text-zinc-400">(via Knowledge)</span>
+              </td>
+              <td className="px-3 py-2 mono text-zinc-500">multi</td>
+              <td className="px-3 py-2 text-zinc-700">
+                Worker indexa em chunks (Knowledge) — busca semântica.
+              </td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2 font-medium">Knowledge</td>
+              <td className="px-3 py-2">
+                <code>#&nbsp;Fatos</code>
+              </td>
+              <td className="px-3 py-2 mono text-zinc-500">multi</td>
+              <td className="px-3 py-2 text-zinc-700">
+                Chunk indexado (gerado automaticamente).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* 11.5 Atributos que importam */}
+      <h3 className="font-semibold text-base mt-8 mb-2">
+        11.5 · Os 5 atributos que mudam o comportamento
+      </h3>
+      <div className="grid md:grid-cols-2 gap-3">
+        <div className="floating-panel p-4">
+          <div className="mono text-[10px] uppercase tracking-wider text-zinc-400 mb-1">
+            priority (30 → 100)
+          </div>
+          <p className="text-xs text-zinc-700 leading-relaxed mb-2">
+            Critério primário de ordenação. Quem entra primeiro, quem é cortado quando budget
+            estoura.
+          </p>
+          <pre className="bg-zinc-50 border border-zinc-100 rounded p-2 mono text-[10px] leading-relaxed">
+            {`100 system     crítico, nunca corta
+ 95 segurança  ex: nunca vazar dado
+ 90 compliance ex: LGPD, CFM
+ 85 regra      ex: BANT antes de preço
+ 75 regra mole ex: formato de resposta
+ 70 persona    voz padrão
+ 60 output     formato
+ 50 memória
+ 40 exemplo
+ 30 nota`}
+          </pre>
+        </div>
+        <div className="floating-panel p-4">
+          <div className="mono text-[10px] uppercase tracking-wider text-zinc-400 mb-1">
+            mode (single | multi)
+          </div>
+          <p className="text-xs text-zinc-700 leading-relaxed mb-2">
+            <code>single</code> = só 1 vence. Persona/Output são single (não faz sentido 2
+            personas). O de maior priority ganha.
+          </p>
+          <p className="text-xs text-zinc-700 leading-relaxed">
+            <code>multi</code> = todos somam, ordenados. Regras, memórias, fatos são multi.
+          </p>
+        </div>
+        <div className="floating-panel p-4">
+          <div className="mono text-[10px] uppercase tracking-wider text-zinc-400 mb-1">
+            scope (hierarquia)
+          </div>
+          <p className="text-xs text-zinc-700 leading-relaxed mb-2">
+            Critério de desempate quando priority empata: escopo mais específico ganha.
+          </p>
+          <pre className="bg-zinc-50 border border-zinc-100 rounded p-2 mono text-[10px] leading-relaxed">
+            {`global → workspace → empresa
+       → projeto → cliente
+       → processo → agente
+       → execucao → temporario`}
+          </pre>
+        </div>
+        <div className="floating-panel p-4">
+          <div className="mono text-[10px] uppercase tracking-wider text-zinc-400 mb-1">
+            tags (RBAC)
+          </div>
+          <p className="text-xs text-zinc-700 leading-relaxed mb-2">
+            Controla acesso por API key. Default-deny + wildcards.
+          </p>
+          <pre className="bg-zinc-50 border border-zinc-100 rounded p-2 mono text-[10px] leading-relaxed">
+            {`key.scopes=["public"]
+  → vê só blocos tag=public
+
+key.scopes=["client:*"]
+  → vê client:delta, client:acme...
+
+key.scopes=["*"]
+  → admin, vê tudo`}
+          </pre>
+        </div>
+      </div>
+      <p className="text-xs text-zinc-500 mt-3 leading-relaxed max-w-2xl italic">
+        <strong>enabled</strong> (5º atributo) é um toggle simples: liga/desliga sem apagar.
+        Útil pra testar variações ou desativar bloco temporariamente.
+      </p>
+
+      {/* 11.6 Memoria vs Documento vs Knowledge */}
+      <h3 className="font-semibold text-base mt-8 mb-2">
+        11.6 · Memória vs Documento vs Knowledge — qual usar?
+      </h3>
+      <div className="floating-panel p-0 overflow-hidden">
+        <table className="w-full text-xs">
+          <thead className="bg-zinc-50 border-b border-zinc-100">
+            <tr className="text-left">
+              <th className="px-3 py-2 font-medium">Tipo</th>
+              <th className="px-3 py-2 font-medium">Origem</th>
+              <th className="px-3 py-2 font-medium">Quando usar</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-100">
+            <tr>
+              <td className="px-3 py-2 font-medium">Memória</td>
+              <td className="px-3 py-2 text-zinc-700">
+                Você escreve <em>declarativo</em> no canvas
+              </td>
+              <td className="px-3 py-2 text-zinc-700">
+                Aprendizado curto, preferência, decisão, "lembrar que cliente X..."
+              </td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2 font-medium">Documento</td>
+              <td className="px-3 py-2 text-zinc-700">
+                Arquivo (PDF/MD/TXT) <em>upload</em> no painel Documents
+              </td>
+              <td className="px-3 py-2 text-zinc-700">
+                Brand book, manual de produto, política, contrato — texto longo
+              </td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2 font-medium">Knowledge</td>
+              <td className="px-3 py-2 text-zinc-700">
+                Chunk <em>gerado automaticamente</em> do Documento pelo worker
+              </td>
+              <td className="px-3 py-2 text-zinc-700">
+                Você não cria manualmente — aparece quando worker termina indexação
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* 11.7 Trace */}
+      <h3 className="font-semibold text-base mt-8 mb-2">
+        11.7 · Trace · audit log de cada chamada
+      </h3>
+      <p className="text-xs text-zinc-600 mb-3 max-w-2xl leading-relaxed">
+        Toda chamada via REST ou MCP gera um trace persistido. Inclui: timestamp, API key,
+        endpoint, blocos considerados/incluídos/excluídos, tokens estimados, warnings,
+        duration_ms, status code. Acessível em{' '}
+        <strong>Acesso ao cérebro → Logs</strong> com filtros + CSV export.
+      </p>
+      <Callout>
+        <strong>Por quê isso importa:</strong> dá compliance (você consegue auditar "que IA
+        consultou o quê e quando"). Quando vender pra cliente externo, esse log é a peça de
+        confiança que prova o RBAC tá funcionando.
+      </Callout>
+    </section>
+  )
+}
+
+// ============================================================
 // PROMPTS PRONTOS
 // ============================================================
 
@@ -715,7 +1123,7 @@ function Prompts() {
   return (
     <section id="prompts" className="scroll-mt-8">
       <SectionLabel
-        num="11"
+        num="12"
         title="Prompts prontos · cola na sua IA favorita"
       />
       <p className="text-sm text-zinc-600 mb-4 max-w-2xl">
@@ -1003,7 +1411,7 @@ function PromptCard({
 function Cheatsheet() {
   return (
     <section className="scroll-mt-8">
-      <SectionLabel num="12" title="Cheatsheet · comandos úteis" />
+      <SectionLabel num="13" title="Cheatsheet · comandos úteis" />
 
       <div className="grid md:grid-cols-2 gap-3">
         <div className="floating-panel p-4">
