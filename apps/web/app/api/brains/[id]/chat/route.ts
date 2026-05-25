@@ -1,10 +1,9 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { NextResponse } from 'next/server'
-import OpenAI from 'openai'
 import { z } from 'zod'
 
 import { getBrainByIdForUser } from '@/lib/brain'
 import { compileContext } from '@/lib/compiler'
+import { getProvider, NoProviderError, type ChatMessage } from '@/lib/llm-provider'
 import { buildPackage } from '@/lib/package-builder'
 import { getCurrentSession } from '@/lib/session'
 import { persistTrace } from '@/lib/trace'
@@ -21,14 +20,6 @@ const ChatSchema = z.object({
   task: z.string().max(500).optional(),
   budget_tokens: z.number().int().min(100).max(50000).optional()
 })
-
-type Provider = 'anthropic' | 'openai' | 'none'
-
-function detectProvider(): Provider {
-  if (process.env.ANTHROPIC_API_KEY) return 'anthropic'
-  if (process.env.OPENAI_API_KEY) return 'openai'
-  return 'none'
-}
 
 export async function POST(req: Request, { params }: Ctx) {
   const session = await getCurrentSession()
@@ -49,29 +40,31 @@ export async function POST(req: Request, { params }: Ctx) {
     )
   }
 
-  const provider = detectProvider()
-  if (provider === 'none') {
-    return NextResponse.json(
-      {
-        error: 'no_provider',
-        message:
-          'Configure ANTHROPIC_API_KEY ou OPENAI_API_KEY no .env.stack pra usar o chat.'
-      },
-      { status: 503 }
-    )
+  let provider
+  try {
+    provider = getProvider()
+  } catch (err) {
+    if (err instanceof NoProviderError) {
+      return NextResponse.json(
+        { error: 'no_provider', message: err.message },
+        { status: 503 }
+      )
+    }
+    throw err
   }
 
-  // Última mensagem do user vira a query do compile
-  const history = parsed.data.messages
+  // Última user message vira query do compile
+  const history: ChatMessage[] = parsed.data.messages.map((m) => ({
+    role: m.role,
+    content: m.content
+  }))
   const lastUser = [...history].reverse().find((m) => m.role === 'user')
   if (!lastUser) {
-    return NextResponse.json(
-      { error: 'no_user_message' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'no_user_message' }, { status: 400 })
   }
 
   const startedAt = Date.now()
+
   const compileResult = await compileContext({
     workspaceId: brain.workspaceId,
     brainId: brain.id,
@@ -79,7 +72,7 @@ export async function POST(req: Request, { params }: Ctx) {
     task: parsed.data.task,
     format: 'messages',
     budgetTokens: parsed.data.budget_tokens ?? 4000,
-    consumer: `chat-${provider}`
+    consumer: `chat-${provider.name}`
   })
 
   const traceId = await persistTrace({
@@ -88,7 +81,7 @@ export async function POST(req: Request, { params }: Ctx) {
     brainVersionId: compileResult.contextVersionId,
     endpoint: `/api/brains/${brain.id}/chat`,
     requestPayload: {
-      provider,
+      provider: provider.name,
       turns: history.length,
       task: parsed.data.task
     },
@@ -114,67 +107,31 @@ export async function POST(req: Request, { params }: Ctx) {
     messages: Array<{ role: 'system' | 'user'; content: string }>
   }
 
-  // Concatena: system do compile + histórico de chat completo (user/assistant)
   const systemContent = pkg.messages
     .filter((m) => m.role === 'system')
     .map((m) => m.content)
     .join('\n\n')
 
-  let llmResponse: string
-  let llmModel: string
-
+  let result
   try {
-    if (provider === 'anthropic') {
-      const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-      llmModel = process.env.ANTHROPIC_CHAT_MODEL ?? 'claude-haiku-4-5-20251001'
-
-      const result = await client.messages.create({
-        model: llmModel,
-        max_tokens: 1500,
-        system: systemContent,
-        messages: history.map((m) => ({
-          role: m.role,
-          content: m.content
-        }))
-      })
-      const first = result.content[0]
-      llmResponse =
-        first?.type === 'text' ? first.text : '[resposta não-textual]'
-    } else {
-      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-      llmModel = process.env.OPENAI_CHAT_MODEL ?? 'gpt-5.2-mini'
-
-      const result = await client.chat.completions.create({
-        model: llmModel,
-        max_completion_tokens: 1500,
-        messages: [
-          { role: 'system', content: systemContent },
-          ...history.map((m) => ({
-            role: m.role,
-            content: m.content
-          }))
-        ]
-      })
-      llmResponse =
-        result.choices[0]?.message?.content ?? '[resposta vazia]'
-    }
+    result = await provider.generate({
+      system: systemContent,
+      messages: history
+    })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown'
     return NextResponse.json(
-      {
-        error: 'llm_call_failed',
-        provider,
-        message
-      },
+      { error: 'llm_call_failed', provider: provider.name, message },
       { status: 502 }
     )
   }
 
   return NextResponse.json({
-    provider,
-    model: llmModel,
+    provider: result.provider,
+    model: result.model,
     trace_id: traceId,
     package_stats: compileResult.stats,
-    response: llmResponse
+    response: result.text,
+    llm_duration_ms: result.duration_ms
   })
 }
