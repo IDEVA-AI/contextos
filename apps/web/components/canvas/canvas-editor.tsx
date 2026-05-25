@@ -19,6 +19,7 @@ import '@xyflow/react/dist/style.css'
 import { type DragEvent, useCallback, useMemo, useRef, useState } from 'react'
 
 import { BottomToolbar } from './bottom-toolbar'
+import { ChatPanel } from './chat-panel'
 import { CompilePanel } from './compile-panel'
 import { ContextNode } from './context-node'
 import { DocumentsPanel } from './documents-panel'
@@ -41,18 +42,26 @@ const NODE_TYPES = {
 
 type Props = {
   brainId: string
+  brainName: string
   workspaceId: string
   initialNodes: CanvasNode[]
   initialEdges: CanvasEdge[]
 }
 
-function CanvasInner({ brainId, workspaceId, initialNodes, initialEdges }: Props) {
+function CanvasInner({
+  brainId,
+  brainName,
+  workspaceId,
+  initialNodes,
+  initialEdges
+}: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState<CanvasNode>(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState<CanvasEdge>(initialEdges)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [docsOpen, setDocsOpen] = useState(false)
   const [compileOpen, setCompileOpen] = useState(false)
   const [versionsOpen, setVersionsOpen] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const rf = useReactFlow()
 
@@ -164,6 +173,12 @@ function CanvasInner({ brainId, workspaceId, initialNodes, initialEdges }: Props
         open={compileOpen}
         onOpenChange={setCompileOpen}
       />
+      <ChatPanel
+        brainId={brainId}
+        brainName={brainName}
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+      />
       <PropertiesPanel
         node={selectedNode}
         onChange={updateNodeData}
@@ -176,9 +191,11 @@ function CanvasInner({ brainId, workspaceId, initialNodes, initialEdges }: Props
         docsOpen={docsOpen}
         compileOpen={compileOpen}
         versionsOpen={versionsOpen}
+        chatOpen={chatOpen}
         onToggleDocs={() => setDocsOpen((v) => !v)}
         onToggleCompile={() => setCompileOpen((v) => !v)}
         onToggleVersions={() => setVersionsOpen((v) => !v)}
+        onToggleChat={() => setChatOpen((v) => !v)}
       />
       <ReactFlow<CanvasNode, CanvasEdge>
         nodes={nodes as Node<CanvasNode['data']>[]}

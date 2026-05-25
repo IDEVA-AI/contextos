@@ -8,6 +8,7 @@ import {
   History,
   HelpCircle,
   Maximize2,
+  MessageCircle,
   ZoomIn,
   ZoomOut,
   type LucideIcon
@@ -19,9 +20,11 @@ type Props = {
   docsOpen: boolean
   compileOpen: boolean
   versionsOpen: boolean
+  chatOpen: boolean
   onToggleDocs: () => void
   onToggleCompile: () => void
   onToggleVersions: () => void
+  onToggleChat: () => void
 }
 
 export function BottomToolbar({
@@ -30,9 +33,11 @@ export function BottomToolbar({
   docsOpen,
   compileOpen,
   versionsOpen,
+  chatOpen,
   onToggleDocs,
   onToggleCompile,
-  onToggleVersions
+  onToggleVersions,
+  onToggleChat
 }: Props) {
   const rf = useReactFlow()
   const { zoom } = useViewport()
@@ -40,12 +45,18 @@ export function BottomToolbar({
   return (
     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 floating-panel px-2 py-1.5 shadow-lg">
       <ToolbarButton
+        icon={MessageCircle}
+        label="Chat"
+        active={chatOpen}
+        accent="#C5F432"
+        onClick={onToggleChat}
+        primary
+      />
+      <ToolbarButton
         icon={Sparkles}
         label="Compilar"
         active={compileOpen}
-        accent="#C5F432"
         onClick={onToggleCompile}
-        primary
       />
       <ToolbarButton
         icon={FileText}
