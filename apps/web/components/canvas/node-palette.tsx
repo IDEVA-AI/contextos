@@ -102,32 +102,71 @@ export function NodePalette() {
   }
 
   return (
-    <aside className="floating-panel absolute top-3 left-3 z-20 w-44 p-2">
-      <div className="mono text-[10px] uppercase tracking-wider text-zinc-400 px-1 mb-2">
-        Blocos · arrasta pro canvas
+    <aside className="floating-panel absolute top-3 left-3 z-20 w-48 p-1.5">
+      <div className="flex items-center justify-between px-2 pt-1 pb-2">
+        <span className="mono text-[9px] uppercase tracking-[0.15em] text-zinc-500 font-medium">
+          Blocos
+        </span>
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 12 12"
+          fill="none"
+          className="text-zinc-300"
+          aria-hidden
+        >
+          <circle cx="3" cy="3" r="1" fill="currentColor" />
+          <circle cx="9" cy="3" r="1" fill="currentColor" />
+          <circle cx="3" cy="9" r="1" fill="currentColor" />
+          <circle cx="9" cy="9" r="1" fill="currentColor" />
+        </svg>
       </div>
-      <ul className="space-y-1">
+      <ul className="space-y-px">
         {PALETTE.map((item) => (
           <li
             key={item.type}
             draggable
             onDragStart={(e) => handleDragStart(e, item)}
-            className="cursor-grab active:cursor-grabbing flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-zinc-50 transition-colors select-none"
+            className="group cursor-grab active:cursor-grabbing flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-zinc-50 transition-all select-none border-l-2 border-transparent hover:border-l-2"
+            style={{ '--accent': item.color } as React.CSSProperties}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderLeftColor = item.color
+              e.currentTarget.style.backgroundColor = `${item.color}10`
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderLeftColor = 'transparent'
+              e.currentTarget.style.backgroundColor = ''
+            }}
             title={item.description}
           >
             <span
-              className="w-2 h-2 rounded-full flex-shrink-0"
-              style={{ background: item.color }}
+              className="w-2.5 h-2.5 rounded-full flex-shrink-0 ring-2 ring-white shadow-sm"
+              style={{
+                background: item.color,
+                boxShadow: `0 0 0 1px ${item.color}33`
+              }}
             />
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-medium leading-tight">{item.label}</div>
-              <div className="text-[10px] text-zinc-500 truncate leading-tight">
-                {item.description}
-              </div>
-            </div>
+            <span className="flex-1 text-[11px] font-medium text-zinc-800 leading-tight truncate">
+              {item.label}
+            </span>
+            <span className="mono text-[9px] text-zinc-300 group-hover:text-zinc-500 transition-colors tabular-nums">
+              p{item.defaultPriority}
+            </span>
           </li>
         ))}
       </ul>
+      <div className="border-t border-zinc-100 mt-1.5 pt-1.5 px-2 flex items-center gap-1">
+        <svg width="9" height="9" viewBox="0 0 12 12" fill="none" className="text-zinc-300" aria-hidden>
+          <path
+            d="M2 6h7m0 0L6 3m3 3L6 9"
+            stroke="currentColor"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span className="text-[9px] text-zinc-400 leading-none">arrasta pro canvas</span>
+      </div>
     </aside>
   )
 }
