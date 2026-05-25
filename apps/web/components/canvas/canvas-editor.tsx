@@ -165,17 +165,20 @@ function CanvasInner({ brainId, workspaceId, initialNodes, initialEdges }: Props
         onDragOver={onDragOver}
         nodeTypes={nodeTypes as unknown as Record<string, typeof ContextNode>}
         fitView
+        fitViewOptions={{ padding: 0.15, maxZoom: 0.9, minZoom: 0.3 }}
+        minZoom={0.2}
+        maxZoom={2}
         proOptions={{ hideAttribution: true }}
         defaultEdgeOptions={{
-          style: { stroke: '#a1a1aa', strokeWidth: 1.5, strokeDasharray: '6 4' },
+          style: { stroke: '#a1a1aa', strokeWidth: 1, strokeDasharray: '4 3' },
           animated: true
         }}
       >
         <Background
           variant={BackgroundVariant.Dots}
-          gap={16}
+          gap={20}
           size={1}
-          color="rgba(0,0,0,0.08)"
+          color="rgba(0,0,0,0.06)"
         />
         <Controls
           className="!shadow-none !border !border-zinc-200 !bg-white/90 !backdrop-blur"

@@ -21,8 +21,8 @@ export function ContextNode({ data, type, selected }: NodeProps) {
     <div
       className={
         selected
-          ? 'floating-panel min-w-44 max-w-64 p-3 ring-2 ring-brand-300'
-          : 'floating-panel min-w-44 max-w-64 p-3'
+          ? 'floating-panel min-w-36 max-w-52 p-2 ring-2 ring-brand-300'
+          : 'floating-panel min-w-36 max-w-52 p-2'
       }
       style={{ opacity: nodeData.enabled ? 1 : 0.5 }}
     >
@@ -32,41 +32,41 @@ export function ContextNode({ data, type, selected }: NodeProps) {
         className="!w-2 !h-2 !bg-zinc-300 !border-0"
       />
 
-      <div className="flex items-center gap-1.5 mb-1.5">
+      <div className="flex items-center gap-1 mb-1">
         <span
           className="w-1.5 h-1.5 rounded-full flex-shrink-0"
           style={{ background: typeInfo!.color }}
         />
-        <span className="mono text-[9px] uppercase tracking-wider text-zinc-400">
+        <span className="mono text-[8px] uppercase tracking-wider text-zinc-400">
           {typeInfo!.label}
         </span>
-        <span className="mono text-[9px] text-zinc-400 ml-auto">
+        <span className="mono text-[8px] text-zinc-400 ml-auto">
           p{nodeData.priority}
         </span>
       </div>
 
-      <div className="font-medium text-xs leading-tight mb-1 truncate">
+      <div className="font-medium text-[11px] leading-tight mb-0.5 truncate">
         {nodeData.title || '(sem título)'}
       </div>
 
       {nodeData.content && (
-        <div className="text-[10px] text-zinc-500 line-clamp-3 leading-relaxed">
+        <div className="text-[9px] text-zinc-500 line-clamp-2 leading-snug">
           {nodeData.content}
         </div>
       )}
 
       {nodeData.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
+        <div className="flex flex-wrap gap-0.5 mt-1">
           {nodeData.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="mono text-[9px] text-zinc-500 bg-zinc-100 px-1 rounded"
+              className="mono text-[8px] text-zinc-500 bg-zinc-100 px-1 rounded"
             >
               {tag}
             </span>
           ))}
           {nodeData.tags.length > 3 && (
-            <span className="mono text-[9px] text-zinc-400">
+            <span className="mono text-[8px] text-zinc-400">
               +{nodeData.tags.length - 3}
             </span>
           )}

@@ -102,7 +102,7 @@ export function NodePalette() {
   }
 
   return (
-    <aside className="floating-panel absolute top-4 left-4 z-20 w-52 p-3">
+    <aside className="floating-panel absolute top-3 left-3 z-20 w-44 p-2">
       <div className="mono text-[10px] uppercase tracking-wider text-zinc-400 px-1 mb-2">
         Blocos · arrasta pro canvas
       </div>
