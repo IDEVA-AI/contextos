@@ -64,7 +64,7 @@ export function PropertiesPanel({ node, onChange, onDelete, onClose }: Props) {
   const typeLabel = TYPE_LABELS[node.type as string] ?? node.type
 
   return (
-    <aside className="floating-panel absolute top-3 right-3 z-20 w-56 max-h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
+    <aside className="floating-panel absolute top-4 right-4 z-20 w-64 max-h-[calc(100vh-6rem)] flex flex-col overflow-hidden">
       <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-zinc-100 flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <span className="mono text-[9px] uppercase tracking-wider text-zinc-400">

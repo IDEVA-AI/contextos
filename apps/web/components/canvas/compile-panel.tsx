@@ -37,12 +37,23 @@ type TestResponse = {
 
 export function CompilePanel({
   workspaceId,
-  brainId
+  brainId,
+  open: controlledOpen,
+  onOpenChange
 }: {
   workspaceId: string
   brainId: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }) {
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = onOpenChange !== undefined
+  const open = isControlled ? !!controlledOpen : internalOpen
+  const setOpen = (v: boolean | ((p: boolean) => boolean)) => {
+    const next = typeof v === 'function' ? v(open) : v
+    if (isControlled) onOpenChange(next)
+    else setInternalOpen(next)
+  }
   const [query, setQuery] = useState('')
   const [task, setTask] = useState('')
   const [budget, setBudget] = useState(4000)
@@ -117,15 +128,17 @@ export function CompilePanel({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="floating-panel absolute top-4 right-[14.5rem] z-20 px-3 py-1.5 text-[11px] font-medium hover:bg-zinc-50 transition-colors"
-        title="Compilar contexto"
-      >
-        <span className="mono text-[10px] text-zinc-400 mr-1.5">c</span>
-        Compilar
-      </button>
+      {!isControlled && (
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="floating-panel absolute top-4 right-[14.5rem] z-20 px-3 py-1.5 text-[11px] font-medium hover:bg-zinc-50 transition-colors"
+          title="Compilar contexto"
+        >
+          <span className="mono text-[10px] text-zinc-400 mr-1.5">c</span>
+          Compilar
+        </button>
+      )}
 
       {open && (
         <aside className="floating-panel absolute top-16 right-[14.5rem] z-20 w-96 max-h-[calc(100vh-8rem)] flex flex-col overflow-hidden">

@@ -22,7 +22,7 @@ export default async function BrainEditorPage({
   ])
 
   return (
-    <div className="h-screen flex flex-col canvas-paper" style={{ zoom: 0.8 }}>
+    <div className="h-screen flex flex-col canvas-paper">
       <header className="h-12 border-b border-zinc-200/70 px-4 flex items-center justify-between gap-3 bg-white/90 backdrop-blur z-10">
         <div className="flex items-center gap-2 min-w-0 text-xs">
           <Link href="/dashboard" className="text-zinc-500 hover:text-zinc-900">

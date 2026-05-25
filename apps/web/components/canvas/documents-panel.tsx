@@ -35,8 +35,23 @@ function fmtBytes(n: number): string {
   return `${(n / (1024 * 1024)).toFixed(1)}MB`
 }
 
-export function DocumentsPanel({ brainId }: { brainId: string }) {
-  const [open, setOpen] = useState(false)
+export function DocumentsPanel({
+  brainId,
+  open: controlledOpen,
+  onOpenChange
+}: {
+  brainId: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = onOpenChange !== undefined
+  const open = isControlled ? !!controlledOpen : internalOpen
+  const setOpen = (v: boolean | ((p: boolean) => boolean)) => {
+    const next = typeof v === 'function' ? v(open) : v
+    if (isControlled) onOpenChange(next)
+    else setInternalOpen(next)
+  }
   const [docs, setDocs] = useState<DocItem[]>([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -112,15 +127,17 @@ export function DocumentsPanel({ brainId }: { brainId: string }) {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="floating-panel absolute top-4 right-[10.5rem] z-20 px-3 py-1.5 text-[11px] font-medium hover:bg-zinc-50 transition-colors"
-        title="Documentos"
-      >
-        <span className="mono text-[10px] text-zinc-400 mr-1.5">d</span>
-        Docs
-      </button>
+      {!isControlled && (
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="floating-panel absolute top-4 right-[10.5rem] z-20 px-3 py-1.5 text-[11px] font-medium hover:bg-zinc-50 transition-colors"
+          title="Documentos"
+        >
+          <span className="mono text-[10px] text-zinc-400 mr-1.5">d</span>
+          Docs
+        </button>
+      )}
 
       {open && (
         <aside className="floating-panel absolute top-16 right-[10.5rem] z-20 w-72 max-h-[calc(100vh-8rem)] flex flex-col overflow-hidden">

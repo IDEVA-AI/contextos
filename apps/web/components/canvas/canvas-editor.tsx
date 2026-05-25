@@ -18,6 +18,7 @@ import {
 import '@xyflow/react/dist/style.css'
 import { type DragEvent, useCallback, useMemo, useRef, useState } from 'react'
 
+import { BottomToolbar } from './bottom-toolbar'
 import { CompilePanel } from './compile-panel'
 import { ContextNode } from './context-node'
 import { DocumentsPanel } from './documents-panel'
@@ -49,6 +50,9 @@ function CanvasInner({ brainId, workspaceId, initialNodes, initialEdges }: Props
   const [nodes, setNodes, onNodesChange] = useNodesState<CanvasNode>(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState<CanvasEdge>(initialEdges)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+  const [docsOpen, setDocsOpen] = useState(false)
+  const [compileOpen, setCompileOpen] = useState(false)
+  const [versionsOpen, setVersionsOpen] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const rf = useReactFlow()
 
@@ -144,14 +148,37 @@ function CanvasInner({ brainId, workspaceId, initialNodes, initialEdges }: Props
     <div ref={wrapperRef} className="w-full h-full relative">
       <NodePalette />
       <SaveIndicator status={status} lastSavedAt={lastSavedAt} />
-      <VersionsPanel brainId={brainId} />
-      <DocumentsPanel brainId={brainId} />
-      <CompilePanel brainId={brainId} workspaceId={workspaceId} />
+      <VersionsPanel
+        brainId={brainId}
+        open={versionsOpen}
+        onOpenChange={setVersionsOpen}
+      />
+      <DocumentsPanel
+        brainId={brainId}
+        open={docsOpen}
+        onOpenChange={setDocsOpen}
+      />
+      <CompilePanel
+        brainId={brainId}
+        workspaceId={workspaceId}
+        open={compileOpen}
+        onOpenChange={setCompileOpen}
+      />
       <PropertiesPanel
         node={selectedNode}
         onChange={updateNodeData}
         onDelete={deleteNode}
         onClose={() => setSelectedNodeId(null)}
+      />
+      <BottomToolbar
+        nodeCount={nodes.length}
+        edgeCount={edges.length}
+        docsOpen={docsOpen}
+        compileOpen={compileOpen}
+        versionsOpen={versionsOpen}
+        onToggleDocs={() => setDocsOpen((v) => !v)}
+        onToggleCompile={() => setCompileOpen((v) => !v)}
+        onToggleVersions={() => setVersionsOpen((v) => !v)}
       />
       <ReactFlow<CanvasNode, CanvasEdge>
         nodes={nodes as Node<CanvasNode['data']>[]}
@@ -181,7 +208,7 @@ function CanvasInner({ brainId, workspaceId, initialNodes, initialEdges }: Props
           color="rgba(0,0,0,0.06)"
         />
         <Controls
-          className="!shadow-none !border !border-zinc-200 !bg-white/90 !backdrop-blur"
+          className="!shadow-none !border !border-zinc-200 !bg-white/90 !backdrop-blur !hidden"
           showInteractive={false}
         />
         <MiniMap
