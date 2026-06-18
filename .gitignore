@@ -47,3 +47,6 @@ coverage/
 .cache
 .eslintcache
 
+.env.*
+node_modules/
+dump.rdb
